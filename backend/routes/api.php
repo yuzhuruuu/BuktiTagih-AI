@@ -15,3 +15,8 @@ Route::get('/analysis/{id}', function ($id) {
 Route::get('/report/{id}', function ($id) { 
     return response()->json(['status' => 'Not Implemented Yet'], 501); 
 }); //[cite: 1]
+
+// Menambahkan rute GET
+Route::get('/evidence', [EvidenceController::class, 'index']);
+
+Route::get('/evidence/{id}', [EvidenceController::class, 'show']);

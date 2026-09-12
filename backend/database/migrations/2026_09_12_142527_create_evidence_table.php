@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('evidence', function (Blueprint $table) {
-            $table->id('evidence_id'); //
-            $table->string('user_id'); // Diisi identifier sesi anonim[cite: 1]
-            $table->string('file_name'); //[cite: 1]
-            $table->string('file_type'); //[cite: 1]
-            $table->timestamp('upload_time')->useCurrent(); //[cite: 1]
-            $table->string('hash_file'); //[cite: 1]
+            $table->id();
+            $table->string('user_id'); // Add this missing column
+            $table->string('file_name');
+            $table->string('file_type');
+            $table->string('hash_file');
+            $table->timestamp('upload_time');
             $table->timestamps();
         });
     }

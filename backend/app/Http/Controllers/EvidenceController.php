@@ -16,7 +16,7 @@ class EvidenceController extends Controller
 
         $file = $request->file('file');
         $hashFile = hash_file('sha256', $file->getRealPath());
-        $path = $file->store('evidence');
+        $path = $file->store('evidence', 'public');
 
         $evidenceId = DB::table('evidence')->insertGetId([
             'user_id' => $request->user_id,
@@ -32,5 +32,27 @@ class EvidenceController extends Controller
             'evidence_id' => $evidenceId,
             'upload_status' => 'success'
         ], 201);
+    }
+        public function index()
+    {
+        // Mengambil seluruh data dari tabel evidence, diurutkan dari yang terbaru
+        $evidences = DB::table('evidence')->latest('created_at')->get();
+
+        // Mengembalikan data dalam format JSON untuk dibaca oleh Postman/Frontend
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data tagihan berhasil diambil',
+            'data' => $evidences
+        ], 200);
+    }
+        public function show($id)
+    {
+        $evidence = Evidence::find($id);
+
+        if (!$evidence) {
+            return response()->json(['message' => 'Data tidak ditemukan'], 404);
+        }
+
+        return response()->json(['status' => 'success', 'data' => $evidence], 200);
     }
 }
