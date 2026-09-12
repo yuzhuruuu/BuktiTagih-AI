@@ -12,7 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('regulation', function (Blueprint $table) {
-            $table->id();
+            $table->id('regulation_id'); //[cite: 1]
+            $table->string('source'); //[cite: 1]
+            $table->string('category'); //[cite: 1]
+            $table->string('topic')->nullable(); //[cite: 1]
+            $table->string('title')->nullable(); //[cite: 1]
+            $table->string('page')->nullable(); //[cite: 1]
+            $table->text('content'); //[cite: 1]
+            $table->text('keywords')->nullable(); //[cite: 1]
             $table->timestamps();
         });
     }
