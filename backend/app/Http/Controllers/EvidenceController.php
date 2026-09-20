@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Evidence;
 
 class EvidenceController extends Controller
 {
@@ -54,5 +55,29 @@ class EvidenceController extends Controller
         }
 
         return response()->json(['status' => 'success', 'data' => $evidence], 200);
+    }
+    public function store(Request $request)
+    {
+        // 1. Validasi file dan user_id jika diperlukan
+        $request->validate([
+            'file' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'user_id' => 'required',
+        ]);
+
+        // 2. Proses simpan file ke storage (misal: public/evidence)
+        $filePath = $request->file('file')->store('evidence', 'public');
+
+        // 3. Simpan ke database menggunakan Model
+        $evidence = Evidence::create([
+            'user_id' => $request->user_id,
+            'file' => $filePath,
+        ]);
+
+        // 4. Kembalikan response beserta data yang baru dibuat (termasuk ID-nya)
+        return response()->json([
+            'success' => true,
+            'message' => 'Berhasil disimpan!',
+            'data' => $evidence // Di sini sudah termasuk id, user_id, file, dll.
+        ], 201);
     }
 }

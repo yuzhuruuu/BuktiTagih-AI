@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EvidenceController;
+use App\Http\Controllers\AnalysisController;
 
 Route::post('/evidence/upload', [EvidenceController::class, 'upload']); //[cite: 1]
 
@@ -20,3 +21,12 @@ Route::get('/report/{id}', function ($id) {
 Route::get('/evidence', [EvidenceController::class, 'index']);
 
 Route::get('/evidence/{id}', [EvidenceController::class, 'show']);
+
+// Endpoint Evidence
+Route::post('/evidence/upload', [EvidenceController::class, 'store']);
+Route::get('/evidence', [EvidenceController::class, 'index']);
+Route::get('/evidence/{id}', [EvidenceController::class, 'show']);
+
+// Endpoint Analysis (Sesuai API Contract)
+Route::post('/analysis/start', [AnalysisController::class, 'start']);
+Route::get('/analysis/{id}', [AnalysisController::class, 'show']);

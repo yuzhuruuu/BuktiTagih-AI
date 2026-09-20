@@ -1,0 +1,19 @@
+$kind: http-request
+description: ""
+url: http://127.0.0.1:8000/api/evidence/upload
+method: POST
+body:
+  type: formdata
+  content:
+    - type: file
+      key: file
+      src:
+        - /C:/Users/YUSRI/Downloads/Lilies.jpg
+      description: ""
+      disabled: false
+    - type: text
+      key: user_id
+      value: sesi_002
+      description: ""
+      disabled: false
+order: 148580591359093
