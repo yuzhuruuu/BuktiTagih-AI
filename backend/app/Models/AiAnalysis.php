@@ -15,6 +15,11 @@ class AiAnalysis extends Model
         'severity',
         'reason',
         'regulation_reference',
-        'confidence'
+        'confidence',
     ];
+
+    public function evidence()
+    {
+        return $this->belongsTo(Evidence::class, 'evidence_id', 'evidence_id');
+    }
 }

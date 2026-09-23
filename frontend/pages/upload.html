@@ -3,23 +3,343 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BuktiTagih AI - Upload</title>
+    <title>BuktiTagih AI — Upload Bukti</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f1117; }
+
+        .brand { font-weight: 700; letter-spacing: -0.5px; }
+        .brand span { color: #3b82f6; }
+
+        .upload-card {
+            background: #1c1f2e;
+            border: 1px solid #2a2d3e;
+            border-radius: 12px;
+        }
+
+        .drop-zone {
+            border: 2px dashed #3b82f6;
+            border-radius: 8px;
+            padding: 48px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .drop-zone:hover, .drop-zone.dragover { background: #1e2a3a; }
+        .drop-zone .icon { font-size: 2.5rem; margin-bottom: 12px; }
+        .drop-zone .hint { color: #7a8499; font-size: 0.875rem; margin-top: 8px; }
+
+        .file-preview {
+            background: #252839;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 0.875rem;
+            color: #c9d1d9;
+        }
+
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: #3b82f6;
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        #statusArea { display: none; }
+
+        .progress { height: 8px; border-radius: 4px; }
+
+        .alert-custom {
+            background: #1c2e1c;
+            border: 1px solid #2a5a2a;
+            border-radius: 8px;
+            color: #c9d1d9;
+        }
+        .alert-custom.alert-error {
+            background: #2e1c1c;
+            border-color: #5a2a2a;
+        }
+    </style>
 </head>
-<body class="bg-dark text-light">
-    <div class="container mt-5">
-        <h2 class="mb-4">Unggah Bukti Penagihan</h2>
-        <div class="card bg-secondary text-white">
-            <div class="card-body">
-                <form id="uploadForm">
-                    <div class="mb-3">
-                        <label for="evidenceFile" class="form-label">Pilih File (Screenshot/PDF)</label>
-                        <input class="form-control bg-dark text-light" type="file" id="evidenceFile" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Proses Bukti</button>
-                </form>
+<body class="text-light">
+
+<nav class="navbar navbar-dark px-4 py-3" style="background:#0f1117; border-bottom:1px solid #2a2d3e;">
+    <span class="brand fs-5">Bukti<span>Tagih</span> AI</span>
+    <span class="text-muted small">Platform Kecerdasan Bukti Digital</span>
+</nav>
+
+<div class="container py-5" style="max-width:680px;">
+
+    <!-- Header -->
+    <div class="mb-4">
+        <h1 class="h4 fw-bold mb-1">Unggah Bukti Penagihan</h1>
+        <p class="text-muted small mb-0">Upload screenshot WhatsApp, chat export, atau PDF riwayat pembayaran. AI akan menganalisis dan menyusun laporan bukti terstruktur.</p>
+    </div>
+
+    <!-- Steps -->
+    <div class="d-flex gap-3 mb-4" style="font-size:0.8rem; color:#7a8499;">
+        <div class="d-flex align-items-center"><span class="step-badge">1</span>Upload Bukti</div>
+        <div class="d-flex align-items-center" style="color:#3a3f52;">→</div>
+        <div class="d-flex align-items-center" style="color:#4a5068;"><span class="step-badge" style="background:#2a2d3e;">2</span>Proses AI</div>
+        <div class="d-flex align-items-center" style="color:#3a3f52;">→</div>
+        <div class="d-flex align-items-center" style="color:#4a5068;"><span class="step-badge" style="background:#2a2d3e;">3</span>Lihat Hasil</div>
+    </div>
+
+    <!-- Upload Card -->
+    <div class="upload-card p-4 mb-4">
+
+        <form id="uploadForm" novalidate>
+
+            <!-- Drop Zone -->
+            <div class="drop-zone mb-3" id="dropZone">
+                <div class="icon">📎</div>
+                <div class="fw-semibold">Seret & lepas file di sini</div>
+                <div class="hint">atau klik untuk memilih file</div>
+                <div class="hint mt-1">JPG · PNG · PDF · Maks. 10 MB</div>
+                <input type="file" id="evidenceFile" accept=".jpg,.jpeg,.png,.pdf"
+                       class="d-none" required>
+            </div>
+
+            <!-- File Preview (hidden until file chosen) -->
+            <div class="file-preview mb-3 d-none" id="filePreview">
+                <span id="filePreviewName"></span>
+                <span class="text-muted ms-2" id="filePreviewSize"></span>
+                <button type="button" class="btn btn-sm btn-outline-danger float-end py-0"
+                        id="clearFile">✕</button>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn btn-primary w-100 fw-semibold" id="submitBtn" disabled>
+                🔍 Mulai Analisis Bukti
+            </button>
+
+        </form>
+    </div>
+
+    <!-- Status Area -->
+    <div id="statusArea">
+
+        <!-- Progress -->
+        <div id="progressBlock" class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+                <span id="statusLabel">Mengunggah file…</span>
+                <span id="statusPct">0%</span>
+            </div>
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated"
+                     id="progressBar" style="width:0%"></div>
             </div>
         </div>
+
+        <!-- Success -->
+        <div class="alert-custom p-3 d-none" id="successBlock">
+            <div class="fw-semibold mb-1">✅ Bukti berhasil diproses</div>
+            <div class="small text-muted mb-2">
+                Evidence ID: <code id="resultEvidenceId"></code> &nbsp;·&nbsp;
+                Analysis ID: <code id="resultAnalysisId"></code>
+            </div>
+            <a id="goToResult" href="#" class="btn btn-success btn-sm">
+                Lihat Hasil Analisis →
+            </a>
+        </div>
+
+        <!-- Error -->
+        <div class="alert-custom alert-error p-3 d-none" id="errorBlock">
+            <div class="fw-semibold mb-1">❌ Terjadi kesalahan</div>
+            <div class="small" id="errorMsg"></div>
+            <button class="btn btn-outline-light btn-sm mt-2" id="retryBtn">Coba Lagi</button>
+        </div>
+
     </div>
+
+    <!-- Info Box -->
+    <div class="mt-4 p-3 rounded" style="background:#1c1f2e; border:1px solid #2a2d3e; font-size:0.8rem; color:#7a8499;">
+        <strong class="text-light">Privasi & Keamanan:</strong>
+        File kamu diproses secara anonim — tidak ada akun yang diperlukan. Hash SHA-256 digunakan untuk memastikan integritas file.
+    </div>
+
+</div>
+
+<script>
+// ─── Konfigurasi ───────────────────────────────────────────────────────────
+const API_BASE = 'http://127.0.0.1:8000/api';
+
+// ─── User ID anonim (UUID per sesi, disimpan di sessionStorage) ────────────
+function getSessionUserId() {
+    let uid = sessionStorage.getItem('buktitagih_uid');
+    if (!uid) {
+        uid = crypto.randomUUID();
+        sessionStorage.setItem('buktitagih_uid', uid);
+    }
+    return uid;
+}
+
+// ─── Elemen DOM ───────────────────────────────────────────────────────────
+const form         = document.getElementById('uploadForm');
+const dropZone     = document.getElementById('dropZone');
+const fileInput    = document.getElementById('evidenceFile');
+const filePreview  = document.getElementById('filePreview');
+const filePreviewName = document.getElementById('filePreviewName');
+const filePreviewSize = document.getElementById('filePreviewSize');
+const clearFileBtn = document.getElementById('clearFile');
+const submitBtn    = document.getElementById('submitBtn');
+
+const statusArea   = document.getElementById('statusArea');
+const progressBlock = document.getElementById('progressBlock');
+const progressBar  = document.getElementById('progressBar');
+const statusLabel  = document.getElementById('statusLabel');
+const statusPct    = document.getElementById('statusPct');
+
+const successBlock = document.getElementById('successBlock');
+const resultEvidenceId = document.getElementById('resultEvidenceId');
+const resultAnalysisId = document.getElementById('resultAnalysisId');
+const goToResult   = document.getElementById('goToResult');
+
+const errorBlock   = document.getElementById('errorBlock');
+const errorMsg     = document.getElementById('errorMsg');
+const retryBtn     = document.getElementById('retryBtn');
+
+// ─── Drop Zone & File Picker ───────────────────────────────────────────────
+dropZone.addEventListener('click', () => fileInput.click());
+
+dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+});
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    const f = e.dataTransfer.files[0];
+    if (f) setFile(f);
+});
+
+fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) setFile(fileInput.files[0]);
+});
+
+clearFileBtn.addEventListener('click', clearFile);
+
+function setFile(f) {
+    fileInput._selectedFile = f;
+    filePreviewName.textContent = f.name;
+    filePreviewSize.textContent = formatBytes(f.size);
+    filePreview.classList.remove('d-none');
+    dropZone.classList.add('d-none');
+    submitBtn.disabled = false;
+}
+
+function clearFile() {
+    fileInput._selectedFile = null;
+    fileInput.value = '';
+    filePreview.classList.add('d-none');
+    dropZone.classList.remove('d-none');
+    submitBtn.disabled = true;
+    resetStatus();
+}
+
+function formatBytes(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+// ─── Status helpers ────────────────────────────────────────────────────────
+function showStatus() {
+    statusArea.style.display = 'block';
+}
+
+function setProgress(pct, label) {
+    progressBlock.classList.remove('d-none');
+    progressBar.style.width = pct + '%';
+    statusLabel.textContent = label;
+    statusPct.textContent = pct + '%';
+}
+
+function showSuccess(evidenceId, analysisId) {
+    progressBlock.classList.add('d-none');
+    successBlock.classList.remove('d-none');
+    resultEvidenceId.textContent = evidenceId;
+    resultAnalysisId.textContent = analysisId;
+    goToResult.href = `result.html?analysis_id=${analysisId}&evidence_id=${evidenceId}`;
+}
+
+function showError(msg) {
+    progressBlock.classList.add('d-none');
+    errorBlock.classList.remove('d-none');
+    errorMsg.textContent = msg;
+}
+
+function resetStatus() {
+    statusArea.style.display = 'none';
+    progressBlock.classList.remove('d-none');
+    successBlock.classList.add('d-none');
+    errorBlock.classList.add('d-none');
+    setProgress(0, '');
+}
+
+retryBtn.addEventListener('click', clearFile);
+
+// ─── Submit ────────────────────────────────────────────────────────────────
+form.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const file = fileInput._selectedFile;
+    if (!file) return;
+
+    submitBtn.disabled = true;
+    showStatus();
+    setProgress(20, 'Mengunggah file…');
+
+    try {
+        // ── Step 1: Upload evidence ─────────────────────────────────────
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('user_id', getSessionUserId());
+
+        const uploadRes = await fetch(`${API_BASE}/evidence/upload`, {
+            method: 'POST',
+            body: formData,
+        });
+
+        const uploadData = await uploadRes.json();
+
+        if (!uploadRes.ok) {
+            throw new Error(uploadData.message || `Upload gagal (HTTP ${uploadRes.status})`);
+        }
+
+        const evidenceId = uploadData.evidence_id;
+        setProgress(60, 'Memulai analisis AI…');
+
+        // ── Step 2: Start analysis ──────────────────────────────────────
+        const analysisRes = await fetch(`${API_BASE}/analysis/start`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ evidence_id: evidenceId }),
+        });
+
+        const analysisData = await analysisRes.json();
+
+        if (!analysisRes.ok) {
+            throw new Error(analysisData.message || `Analisis gagal (HTTP ${analysisRes.status})`);
+        }
+
+        setProgress(100, 'Selesai!');
+        showSuccess(evidenceId, analysisData.analysis_id);
+
+    } catch (err) {
+        showError(err.message || 'Terjadi kesalahan yang tidak diketahui.');
+        submitBtn.disabled = false;
+    }
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

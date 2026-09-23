@@ -1,29 +1,54 @@
 <?php
 
 namespace App\Services;
+
 use Illuminate\Support\Facades\Http;
 
 class AiAnalysisService
 {
-    public function analyzeDocument($evidenceId, $filePath)
+    protected string $langflowUrl;
+    protected string $flowId;
+    protected string $apiKey;
+
+    public function __construct()
     {
-        // Di sini nantinya kita akan menulis kode untuk mengirim file ke API AI 
-        // (misalnya menggunakan cURL atau HTTP Client bawaan Laravel)
-        
-        // Untuk tahap awal, kita kembalikan respon simulasi sukses terlebih dahulu
-        return [
-            'status' => 'processing',
-            'message' => 'Dokumen berhasil diteruskan ke sistem AI.',
-            'evidence_id' => $evidenceId
-        ];
+        $this->langflowUrl = rtrim(config('services.langflow.url', 'http://localhost:7860'), '/');
+        $this->flowId      = config('services.langflow.flow_id', '');
+        $this->apiKey      = config('services.langflow.api_key', '');
     }
-    public function sendToLangflow($evidenceId, $filePath)
+
+    /**
+     * Kirim evidence ke Langflow untuk diproses AI.
+     * Jika Langflow belum tersedia, kembalikan status simulasi.
+     */
+    public function analyzeDocument(int $evidenceId, string $filePath): array
     {
-        $response = Http::post('URL_ENDPOINT_LANGFLOW', [
+        if (empty($this->flowId)) {
+            // Langflow belum dikonfigurasi — kembalikan simulasi
+            return [
+                'status'      => 'processing',
+                'message'     => 'Dokumen berhasil diteruskan ke sistem AI.',
+                'evidence_id' => $evidenceId,
+            ];
+        }
+
+        return $this->sendToLangflow($evidenceId, $filePath);
+    }
+
+    /**
+     * Kirim file ke endpoint Langflow sesuai flow_id dari .env
+     */
+    public function sendToLangflow(int $evidenceId, string $filePath): array
+    {
+        $endpoint = "{$this->langflowUrl}/api/v1/run/{$this->flowId}";
+
+        $response = Http::withHeaders([
+            'x-api-key' => $this->apiKey,
+        ])->post($endpoint, [
             'evidence_id' => $evidenceId,
-            'file_path' => $filePath,
+            'file_path'   => $filePath,
         ]);
 
-        return $response->json();
+        return $response->json() ?? ['status' => 'error', 'message' => 'Tidak ada respons dari Langflow'];
     }
 }

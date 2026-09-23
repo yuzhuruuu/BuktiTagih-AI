@@ -43,12 +43,13 @@ class AnalysisController extends Controller
         }
 
         return response()->json([
-            'analysis_id' => $analysis->analysis_id,
-            'category' => $analysis->category,
-            'severity' => $analysis->severity,
-            'evidence' => $analysis->evidence,
+            'analysis_id'          => $analysis->analysis_id,
+            'category'             => $analysis->category,
+            'severity'             => $analysis->severity,
+            'reason'               => $analysis->reason,
+            'evidence'             => $analysis->evidence,
             'regulation_reference' => $analysis->regulation_reference,
-            'confidence' => $analysis->confidence
+            'confidence'           => $analysis->confidence,
         ], 200);
     }
 

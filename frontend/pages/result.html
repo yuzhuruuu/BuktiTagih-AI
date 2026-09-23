@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="id" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuktiTagih AI — Hasil Analisis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f1117; }
+
+        .brand { font-weight: 700; letter-spacing: -0.5px; }
+        .brand span { color: #3b82f6; }
+
+        .result-card {
+            background: #1c1f2e;
+            border: 1px solid #2a2d3e;
+            border-radius: 12px;
+        }
+
+        .section-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #7a8499;
+            margin-bottom: 6px;
+        }
+
+        /* Severity badge */
+        .badge-severity {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+        .sev-HIGH    { background: #3a1c1c; color: #ff6b6b; border: 1px solid #5a2a2a; }
+        .sev-MEDIUM  { background: #2e2a1a; color: #ffc75f; border: 1px solid #5a4a1a; }
+        .sev-LOW     { background: #1a2e1a; color: #6bcb77; border: 1px solid #2a5a2a; }
+        .sev-PENDING { background: #252839; color: #7a8499; border: 1px solid #3a3f52; }
+
+        /* Category badge */
+        .badge-category {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+        .cat-HARASSMENT   { background: #3a1c2e; color: #ff8fab; }
+        .cat-THREAT       { background: #3a1c1c; color: #ff6b6b; }
+        .cat-DATA_EXPOSURE{ background: #1c1c3a; color: #74b9ff; }
+        .cat-SPAM         { background: #2e2a1a; color: #ffc75f; }
+        .cat-NORMAL       { background: #1a2e1a; color: #6bcb77; }
+        .cat-PENDING      { background: #252839; color: #7a8499; }
+
+        /* Confidence bar */
+        .confidence-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: #252839;
+            overflow: hidden;
+        }
+        .confidence-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: #3b82f6;
+            transition: width 0.8s ease;
+        }
+
+        /* Regulation reference box */
+        .reg-box {
+            background: #12192e;
+            border: 1px solid #1e2d4a;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 0.875rem;
+            color: #93c5fd;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* Reason box */
+        .reason-box {
+            background: #252839;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 0.875rem;
+            color: #c9d1d9;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* Evidence meta */
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #2a2d3e;
+            font-size: 0.85rem;
+        }
+        .meta-row:last-child { border-bottom: none; }
+        .meta-key { color: #7a8499; }
+        .meta-val { color: #c9d1d9; font-family: monospace; }
+
+        /* Skeleton loader */
+        .skeleton {
+            background: linear-gradient(90deg, #252839 25%, #2e3248 50%, #252839 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: 6px;
+        }
+        @keyframes shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        #loadingState  { display: block; }
+        #resultState   { display: none; }
+        #errorState    { display: none; }
+    </style>
+</head>
+<body class="text-light">
+
+<nav class="navbar navbar-dark px-4 py-3" style="background:#0f1117; border-bottom:1px solid #2a2d3e;">
+    <span class="brand fs-5">Bukti<span>Tagih</span> AI</span>
+    <a href="upload.html" class="btn btn-sm btn-outline-secondary">← Upload Baru</a>
+</nav>
+
+<div class="container py-5" style="max-width:720px;">
+
+    <div class="mb-4">
+        <h1 class="h4 fw-bold mb-1">Hasil Analisis Bukti</h1>
+        <p class="text-muted small mb-0" id="subHeading">Memuat data analisis…</p>
+    </div>
+
+    <!-- ── Loading Skeleton ──────────────────────────────────────────────── -->
+    <div id="loadingState">
+        <div class="result-card p-4 mb-3">
+            <div class="skeleton mb-3" style="height:20px; width:40%;"></div>
+            <div class="skeleton mb-2" style="height:14px; width:100%;"></div>
+            <div class="skeleton mb-2" style="height:14px; width:80%;"></div>
+            <div class="skeleton" style="height:14px; width:60%;"></div>
+        </div>
+        <div class="result-card p-4">
+            <div class="skeleton mb-3" style="height:20px; width:30%;"></div>
+            <div class="skeleton mb-2" style="height:14px; width:100%;"></div>
+            <div class="skeleton" style="height:14px; width:70%;"></div>
+        </div>
+    </div>
+
+    <!-- ── Error State ───────────────────────────────────────────────────── -->
+    <div id="errorState" class="result-card p-4">
+        <div class="fw-semibold mb-2 text-danger">❌ Gagal memuat hasil analisis</div>
+        <div class="small text-muted mb-3" id="errorMsg"></div>
+        <a href="upload.html" class="btn btn-outline-light btn-sm">← Kembali ke Upload</a>
+    </div>
+
+    <!-- ── Result State ──────────────────────────────────────────────────── -->
+    <div id="resultState">
+
+        <!-- Verdict Card -->
+        <div class="result-card p-4 mb-3">
+            <div class="section-label">Hasil Klasifikasi AI</div>
+
+            <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+                <span id="categoryBadge" class="badge-category cat-PENDING">—</span>
+                <span id="severityBadge" class="badge-severity sev-PENDING">—</span>
+            </div>
+
+            <!-- Confidence -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between small mb-1">
+                    <span class="text-muted">Tingkat Keyakinan AI</span>
+                    <span id="confidencePct" class="fw-semibold">—</span>
+                </div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" id="confidenceFill" style="width:0%;"></div>
+                </div>
+            </div>
+
+            <!-- Reason -->
+            <div>
+                <div class="section-label">Alasan Analisis</div>
+                <div class="reason-box" id="reasonBox">—</div>
+            </div>
+        </div>
+
+        <!-- Regulation Reference Card -->
+        <div class="result-card p-4 mb-3">
+            <div class="section-label">Referensi Regulasi</div>
+            <div class="reg-box" id="regulationBox">—</div>
+            <div class="mt-2 small text-muted">
+                Sumber: POJK, AFPI, UU PDP — diambil dari knowledge base regulasi BuktiTagih AI
+            </div>
+        </div>
+
+        <!-- Evidence Meta Card -->
+        <div class="result-card p-4 mb-4" id="evidenceMetaCard">
+            <div class="section-label">Informasi Bukti</div>
+            <div id="evidenceMetaBody">
+                <!-- diisi oleh JS -->
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="d-flex gap-2 flex-wrap">
+            <a id="downloadBtn" href="#" class="btn btn-primary fw-semibold">
+                ⬇ Download Laporan PDF
+            </a>
+            <a href="bob.html" id="bobBtn" class="btn btn-outline-info fw-semibold">
+                💬 Diskusi dengan Bob
+            </a>
+            <a href="upload.html" class="btn btn-outline-secondary">
+                ← Upload Bukti Lain
+            </a>
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="mt-4 p-3 rounded small text-muted" style="background:#1c1f2e; border:1px solid #2a2d3e;">
+            <strong class="text-light">Perhatian:</strong>
+            Hasil analisis ini dihasilkan oleh sistem AI dan <em>bukan merupakan nasihat hukum</em>.
+            Gunakan laporan ini sebagai bahan pendukung pengaduan ke OJK, AFPI, atau lembaga bantuan hukum.
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+// ─── Konfigurasi ───────────────────────────────────────────────────────────
+const API_BASE = 'http://127.0.0.1:8000/api';
+
+// ─── Baca query params ─────────────────────────────────────────────────────
+const params     = new URLSearchParams(window.location.search);
+const analysisId = params.get('analysis_id');
+const evidenceId = params.get('evidence_id');
+
+// ─── Label Maps ───────────────────────────────────────────────────────────
+const CATEGORY_LABEL = {
+    HARASSMENT:    'Intimidasi / Harassment',
+    THREAT:        'Ancaman / Threat',
+    DATA_EXPOSURE: 'Kebocoran Data / Data Exposure',
+    SPAM:          'Spam Berlebihan',
+    NORMAL:        'Normal',
+    PENDING:       'Menunggu Proses AI',
+};
+
+const SEVERITY_LABEL = {
+    HIGH:    '🔴 Tinggi',
+    MEDIUM:  '🟡 Sedang',
+    LOW:     '🟢 Rendah',
+    PENDING: '⏳ Pending',
+};
+
+// ─── DOM refs ─────────────────────────────────────────────────────────────
+const loadingState    = document.getElementById('loadingState');
+const resultState     = document.getElementById('resultState');
+const errorState      = document.getElementById('errorState');
+const errorMsg        = document.getElementById('errorMsg');
+const subHeading      = document.getElementById('subHeading');
+
+const categoryBadge   = document.getElementById('categoryBadge');
+const severityBadge   = document.getElementById('severityBadge');
+const confidencePct   = document.getElementById('confidencePct');
+const confidenceFill  = document.getElementById('confidenceFill');
+const reasonBox       = document.getElementById('reasonBox');
+const regulationBox   = document.getElementById('regulationBox');
+const evidenceMetaBody = document.getElementById('evidenceMetaBody');
+const downloadBtn     = document.getElementById('downloadBtn');
+const bobBtn          = document.getElementById('bobBtn');
+
+// ─── Show/hide helpers ─────────────────────────────────────────────────────
+function showResult()  { loadingState.style.display='none'; resultState.style.display='block'; }
+function showError(m)  { loadingState.style.display='none'; errorState.style.display='block'; errorMsg.textContent=m; }
+
+// ─── Render helpers ────────────────────────────────────────────────────────
+function renderCategory(cat) {
+    const c = (cat || 'PENDING').toUpperCase();
+    categoryBadge.textContent = CATEGORY_LABEL[c] || c;
+    categoryBadge.className = `badge-category cat-${c}`;
+}
+
+function renderSeverity(sev) {
+    const s = (sev || 'PENDING').toUpperCase();
+    severityBadge.textContent = SEVERITY_LABEL[s] || s;
+    severityBadge.className = `badge-severity sev-${s}`;
+}
+
+function renderConfidence(conf) {
+    const pct = conf ? Math.round(parseFloat(conf) * 100) : 0;
+    confidencePct.textContent = pct + '%';
+    // Render setelah sedikit delay agar animasi terlihat
+    setTimeout(() => { confidenceFill.style.width = pct + '%'; }, 100);
+}
+
+function renderEvidence(ev) {
+    if (!ev) return;
+    const rows = [
+        { key: 'Evidence ID', val: ev.evidence_id ?? '—' },
+        { key: 'Nama File',   val: ev.file_name   ?? '—' },
+        { key: 'Tipe File',   val: ev.file_type   ?? '—' },
+        { key: 'Waktu Upload',val: ev.upload_time ?? '—' },
+    ];
+    evidenceMetaBody.innerHTML = rows.map(r =>
+        `<div class="meta-row"><span class="meta-key">${r.key}</span><span class="meta-val">${r.val}</span></div>`
+    ).join('');
+}
+
+// ─── Fetch Analysis ────────────────────────────────────────────────────────
+async function loadAnalysis() {
+    if (!analysisId) {
+        showError('Parameter analysis_id tidak ditemukan di URL. Kembali ke halaman upload.');
+        return;
+    }
+
+    try {
+        const res  = await fetch(`${API_BASE}/analysis/${analysisId}`, {
+            headers: { 'Accept': 'application/json' }
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.message || `HTTP ${res.status}`);
+        }
+
+        // Render semua bagian
+        subHeading.textContent = `Analysis ID: ${analysisId}  ·  Evidence ID: ${evidenceId || data.evidence?.evidence_id || '—'}`;
+
+        renderCategory(data.category);
+        renderSeverity(data.severity);
+        renderConfidence(data.confidence);
+
+        reasonBox.textContent     = data.reason     || 'Menunggu proses AI pipeline…';
+        regulationBox.textContent = data.regulation_reference || 'Referensi regulasi belum tersedia.';
+
+        renderEvidence(data.evidence);
+
+        // Download PDF button
+        const eid = evidenceId || data.evidence?.evidence_id;
+        if (eid) {
+            downloadBtn.href = `${API_BASE}/report/${eid}`;
+            downloadBtn.setAttribute('download', `BuktiTagih_Laporan_${eid}.pdf`);
+        } else {
+            downloadBtn.classList.add('disabled');
+        }
+
+        // Bob button — bawa analysis_id sebagai context
+        bobBtn.href = `bob.html?analysis_id=${analysisId}`;
+
+        showResult();
+
+    } catch (err) {
+        showError(err.message || 'Gagal mengambil data dari server.');
+    }
+}
+
+// ─── Init ──────────────────────────────────────────────────────────────────
+loadAnalysis();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
