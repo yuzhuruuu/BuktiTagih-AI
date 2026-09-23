@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('evidence', function (Blueprint $table) {
             $table->id();
             $table->string('user_id'); // Add this missing column
+            $table->string('file');
             $table->string('file_name');
             $table->string('file_type');
             $table->string('hash_file');

@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('extracted_entity', function (Blueprint $table) {
-            $table->id('entity_id'); //[cite: 1]
-            $table->foreignId('evidence_id')->references('evidence_id')->on('evidence')->onDelete('cascade'); //[cite: 1]
+            $table->id();
+            $table->foreignId('evidence_id')->constrained('evidence')->onDelete('cascade');
             $table->string('entity_type'); //[cite: 1]
             $table->text('entity_value'); //[cite: 1]
             $table->decimal('confidence', 5, 4)->nullable(); //[cite: 1]

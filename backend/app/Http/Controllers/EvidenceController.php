@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Evidence;
 
 class EvidenceController extends Controller
@@ -16,14 +17,21 @@ class EvidenceController extends Controller
         ]);
 
         $file = $request->file('file');
-        $hashFile = hash_file('sha256', $file->getRealPath());
-        $path = $file->store('evidence', 'public');
+
+        // Ekstrak metadata file
+        $fileName = $file->getClientOriginalName();
+        $fileType = $file->getClientOriginalExtension();
+        $hashFile = hash_file('sha256', $file->getRealPath()); 
+
+        // Simpan file fisik dan ambil path-nya
+        $filePath = $file->storeAs('public/evidence', $hashFile . '.' . $file->getClientOriginalExtension());
 
         $evidenceId = DB::table('evidence')->insertGetId([
             'user_id' => $request->user_id,
             'file_name' => $file->getClientOriginalName(),
             'file_type' => $file->getClientMimeType(),
             'hash_file' => $hashFile,
+            'file' => $filePath, // <-- TAMBAHKAN BARIS INI (menyimpan path ke database)
             'upload_time' => now(),
             'created_at' => now(),
             'updated_at' => now(),
@@ -78,6 +86,6 @@ class EvidenceController extends Controller
             'success' => true,
             'message' => 'Berhasil disimpan!',
             'data' => $evidence // Di sini sudah termasuk id, user_id, file, dll.
-        ], 201);
+        ], 200);
     }
 }

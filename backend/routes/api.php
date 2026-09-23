@@ -23,7 +23,7 @@ Route::get('/evidence', [EvidenceController::class, 'index']);
 Route::get('/evidence/{id}', [EvidenceController::class, 'show']);
 
 // Endpoint Evidence
-Route::post('/evidence/upload', [EvidenceController::class, 'store']);
+Route::post('/evidence/upload', [EvidenceController::class, 'upload']);
 Route::get('/evidence', [EvidenceController::class, 'index']);
 Route::get('/evidence/{id}', [EvidenceController::class, 'show']);
 
