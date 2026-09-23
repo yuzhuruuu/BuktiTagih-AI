@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('evidence', function (Blueprint $table) {
-            $table->id();
-            $table->string('user_id'); // Add this missing column
-            $table->string('file');
+            $table->id('evidence_id');
+            $table->string('user_id');
             $table->string('file_name');
             $table->string('file_type');
+            $table->timestamp('upload_time')->useCurrent();
             $table->string('hash_file');
-            $table->timestamp('upload_time');
+            $table->string('file')->nullable();
             $table->timestamps();
         });
     }

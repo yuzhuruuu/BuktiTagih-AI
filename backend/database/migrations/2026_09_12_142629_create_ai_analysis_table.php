@@ -12,15 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('ai_analysis', function (Blueprint $table) {
-            $table->id('analysis_id'); //[cite: 1]
-            $table->foreignId('evidence_id')->constrained('evidence')->onDelete('cascade');
-            $table->string('category'); //[cite: 1]
-            $table->string('severity'); //[cite: 1]
-            $table->text('reason')->nullable(); //[cite: 1]
-            $table->text('regulation_reference')->nullable(); //[cite: 1]
-            $table->decimal('confidence', 5, 4)->nullable(); //[cite: 1]
-            $table->timestamps();
-        });
+                $table->id('analysis_id');
+                // Menghubungkan foreign key ke tabel evidence
+                $table->unsignedBigInteger('evidence_id');
+                $table->foreign('evidence_id')->references('evidence_id')->on('evidence')->onDelete('cascade');
+                
+                $table->string('category');
+                $table->string('severity');
+                $table->text('reason')->nullable();
+                $table->text('regulation_reference')->nullable();
+                $table->decimal('confidence', 5, 4)->nullable();
+                $table->timestamps();
+            });
     }
 
     /**

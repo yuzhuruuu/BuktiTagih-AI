@@ -4,29 +4,15 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EvidenceController;
 use App\Http\Controllers\AnalysisController;
 
-Route::post('/evidence/upload', [EvidenceController::class, 'upload']); //[cite: 1]
-
-// Kerangka untuk diintegrasikan dengan Langflow nanti
-Route::post('/analysis/start', function () { 
-    return response()->json(['status' => 'Not Implemented Yet'], 501); 
-}); //[cite: 1]
-Route::get('/analysis/{id}', function ($id) { 
-    return response()->json(['status' => 'Not Implemented Yet'], 501); 
-}); //[cite: 1]
-Route::get('/report/{id}', function ($id) { 
-    return response()->json(['status' => 'Not Implemented Yet'], 501); 
-}); //[cite: 1]
-
-// Menambahkan rute GET
-Route::get('/evidence', [EvidenceController::class, 'index']);
-
-Route::get('/evidence/{id}', [EvidenceController::class, 'show']);
-
-// Endpoint Evidence
+// 1. Endpoint Evidence (Upload & Retrieval)
 Route::post('/evidence/upload', [EvidenceController::class, 'upload']);
 Route::get('/evidence', [EvidenceController::class, 'index']);
 Route::get('/evidence/{id}', [EvidenceController::class, 'show']);
 
-// Endpoint Analysis (Sesuai API Contract)
+// 2. Endpoint Analysis (Sesuai API Contract Final)
 Route::post('/analysis/start', [AnalysisController::class, 'start']);
 Route::get('/analysis/{id}', [AnalysisController::class, 'show']);
+Route::post('/analysis/start', [AnalysisController::class, 'startAnalysis']);
+
+// 3. Endpoint PDF Report (Sesuai API Contract Final)
+Route::get('/report/{id}', [EvidenceController::class, 'generatePdfReport']);

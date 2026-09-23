@@ -51,4 +51,19 @@ class AnalysisController extends Controller
             'confidence' => $analysis->confidence
         ], 200);
     }
+
+    public function startAnalysis(Request $request)
+    {
+        // Ambil data 'evidence_id' yang dikirim dari Postman
+        $evidenceId = $request->input('evidence_id');
+
+        // TODO: Tambahkan logika atau proses analisis di sini
+
+        // Berikan respons kembali ke Postman
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Analysis started successfully',
+            'evidence_id' => $evidenceId
+        ]);
+    }
 }

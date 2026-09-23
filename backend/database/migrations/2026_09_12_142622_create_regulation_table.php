@@ -12,16 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('regulation', function (Blueprint $table) {
-            $table->id('regulation_id'); //[cite: 1]
-            $table->string('source'); //[cite: 1]
-            $table->string('category'); //[cite: 1]
-            $table->string('topic')->nullable(); //[cite: 1]
-            $table->string('title')->nullable(); //[cite: 1]
-            $table->string('page')->nullable(); //[cite: 1]
-            $table->text('content'); //[cite: 1]
-            $table->text('keywords')->nullable(); //[cite: 1]
-            $table->timestamps();
-        });
+                $table->id('regulation_id');
+                $table->string('source');
+                $table->string('category');
+                $table->string('topic')->nullable();
+                $table->string('title')->nullable();
+                $table->string('page')->nullable();
+                $table->text('content');
+                $table->text('keywords')->nullable();
+                $table->timestamps();
+            });
     }
 
     /**
