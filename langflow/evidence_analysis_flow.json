@@ -705,7 +705,7 @@
             ],
             "frozen": false,
             "icon": "brain-circuit",
-            "last_updated": "2026-09-12T16:30:26.706Z",
+            "last_updated": "2026-09-24T13:35:14.873Z",
             "legacy": false,
             "lf_version": "1.11.6",
             "metadata": {
@@ -958,23 +958,6 @@
                       "model_name_param": "model",
                       "reasoning": true,
                       "reasoning_models": [
-                        "gemini-3.7-flash"
-                      ]
-                    },
-                    "name": "gemini-3.7-flash",
-                    "provider": "Google Generative AI"
-                  },
-                  {
-                    "category": "Google Generative AI",
-                    "icon": "GoogleGenerativeAI",
-                    "metadata": {
-                      "api_key_param": "google_api_key",
-                      "context_length": 128000,
-                      "max_tokens_field_name": "max_output_tokens",
-                      "model_class": "ChatGoogleGenerativeAIFixed",
-                      "model_name_param": "model",
-                      "reasoning": true,
-                      "reasoning_models": [
                         "gemini-flash-latest"
                       ]
                     },
@@ -992,10 +975,10 @@
                       "model_name_param": "model",
                       "reasoning": true,
                       "reasoning_models": [
-                        "gemini-3.6-flash"
+                        "gemini-3.7-flash"
                       ]
                     },
-                    "name": "gemini-3.6-flash",
+                    "name": "gemini-3.7-flash",
                     "provider": "Google Generative AI"
                   },
                   {
@@ -1009,10 +992,27 @@
                       "model_name_param": "model",
                       "reasoning": true,
                       "reasoning_models": [
-                        "gemini-3.5-flash-lite"
+                        "gemini-flash-lite-latest"
                       ]
                     },
-                    "name": "gemini-3.5-flash-lite",
+                    "name": "gemini-flash-lite-latest",
+                    "provider": "Google Generative AI"
+                  },
+                  {
+                    "category": "Google Generative AI",
+                    "icon": "GoogleGenerativeAI",
+                    "metadata": {
+                      "api_key_param": "google_api_key",
+                      "context_length": 128000,
+                      "max_tokens_field_name": "max_output_tokens",
+                      "model_class": "ChatGoogleGenerativeAIFixed",
+                      "model_name_param": "model",
+                      "reasoning": true,
+                      "reasoning_models": [
+                        "gemini-3.6-flash"
+                      ]
+                    },
+                    "name": "gemini-3.6-flash",
                     "provider": "Google Generative AI"
                   }
                 ],
@@ -1038,10 +1038,10 @@
                       "model_name_param": "model",
                       "reasoning": true,
                       "reasoning_models": [
-                        "gemini-3.8-flash"
+                        "gemini-3.6-flash"
                       ]
                     },
-                    "name": "gemini-3.8-flash",
+                    "name": "gemini-3.6-flash",
                     "provider": "Google Generative AI"
                   }
                 ]
@@ -1184,7 +1184,7 @@
                 "trace_as_metadata": true,
                 "track_in_telemetry": false,
                 "type": "str",
-                "value": "Role: AI evidence analyst. Task: 1. Extract entities: actor, victim, date_time, phone_number, organization, location, key_event. 2. Classify the evidence into exactly one category: NORMAL, HARASSMENT, THREAT, DATA_EXPOSURE, SPAM. 3. Assign severity: LOW, MEDIUM, or HIGH.  Output: JSON only, no extra text, in this exact format: {   \"category\": \"\",   \"severity\": \"\",   \"evidence\": {     \"actor\": \"\", \"victim\": \"\", \"date_time\": \"\", \"phone_number\": \"\",     \"organization\": \"\", \"location\": \"\", \"key_event\": \"\"   },   \"confidence\": 0.0 }"
+                "value": "Kamu adalah AI evidence analyst untuk kasus penagihan pinjaman online (pinjol) di Indonesia.\n\nINPUT\nInput berupa screenshot (chat, SMS, riwayat panggilan) atau teks. Jika ada gambar, baca dulu semua teks yang terlihat (nama/nomor pengirim, tanggal, jam, isi pesan). Jangan mengarang teks yang tidak terbaca. Jika gambar tidak jelas atau tidak terbaca, jelaskan di \"reason\", turunkan confidence (maksimal 20), dan isi category NORMAL dengan severity LOW.\n\nTUGAS\n1. Ekstrak entity: actor, victim, date_time, phone_number, organization, location, key_event. Masukkan hanya yang benar-benar ada di bukti.\n2. Klasifikasikan ke TEPAT SATU kategori.\n3. Tentukan severity: LOW, MEDIUM, atau HIGH.\n4. Tulis \"reason\" dalam bahasa Indonesia (1-3 kalimat) yang menyebut bagian bukti yang menjadi dasar.\nUntuk entity, isi nilai yang konkret (nama, nomor telepon, nama perusahaan, tanggal). Jangan isi dengan kata ganti seperti \"kami\", \"kamu\", atau \"Anda\"; jika tidak ada nilai konkret, lewati entity tersebut.\n\nDEFINISI KATEGORI\n- NORMAL: pengingat tagihan yang sopan dan wajar (jatuh tempo, nominal, cara bayar) tanpa tekanan atau ancaman.\n- HARASSMENT: intimidasi atau tekanan TANPA ancaman eksplisit berpola \"kalau X maka Y\". Contoh: kata kasar atau menghina, kontak berlebihan, menyebut tahu alamat/tempat kerja/keluarga untuk menakut-nakuti (\"kami tahu alamat rumah kamu, tunggu saja\").\n- THREAT: ancaman BERSYARAT yang eksplisit untuk memaksa pembayaran (\"kalau/jika tidak bayar, kami akan ...\"), termasuk ancaman kekerasan, mempermalukan, atau menyebarkan data.\n- DATA_EXPOSURE: penyebaran atau pengiriman data pribadi ke pihak ketiga yang dinyatakan sedang atau sudah dilakukan, TANPA syarat (\"kami kirim foto KTP Anda ke grup\", \"data kamu sudah kami sebar\").\n- SPAM: pesan massal atau berulang yang tidak terkait tagihan pengguna (promosi pinjaman lain, link, penawaran).\n\nATURAN PEMBEDA\n- Ada syarat (kalau/jika/apabila tidak bayar ... kami akan ...) -> THREAT, walaupun isi ancamannya soal data.\n- Data pribadi dinyatakan sudah/sedang disebar tanpa syarat -> DATA_EXPOSURE.\n- Intimidasi tersirat tanpa ancaman eksplisit -> HARASSMENT.\n- Jika memenuhi lebih dari satu, pilih yang paling sesuai dengan aturan di atas.\n\nSEVERITY\n- LOW: NORMAL dan SPAM biasa.\n- MEDIUM: kata kasar atau tekanan berulang tanpa ancaman.\n- HIGH: ancaman, penyebaran data pribadi, atau intimidasi yang menyebut alamat/keluarga.\n\nCONFIDENCE\nBilangan bulat 0-100: seberapa yakin kamu pada kategori yang dipilih. Turunkan jika teks buram atau konteksnya kurang.\n\nREGULASI\nIsi \"regulation_reference\" dengan [] (array kosong). Jangan menyebut pasal atau peraturan apa pun.\n\nOUTPUT\nBalas HANYA dengan JSON valid, tanpa teks lain dan tanpa markdown:\n{\n  \"category\": \"NORMAL|HARASSMENT|THREAT|DATA_EXPOSURE|SPAM\",\n  \"severity\": \"LOW|MEDIUM|HIGH\",\n  \"reason\": \"...\",\n  \"confidence\": 0,\n  \"regulation_reference\": [],\n  \"entities\": [\n    {\"entity_type\": \"actor\", \"entity_value\": \"...\", \"confidence\": 0}\n  ]\n}"
               },
               "temperature": {
                 "_input_type": "SliderInput",
@@ -1234,14 +1234,14 @@
           "x": 238.8384186762371,
           "y": -65.53376756453764
         },
-        "selected": false,
+        "selected": true,
         "type": "genericNode"
       }
     ],
     "viewport": {
-      "x": 32.67614768023532,
-      "y": 166.33053905723966,
-      "zoom": 1.0563456400196114
+      "x": 35.551161191270126,
+      "y": 163.7419312927897,
+      "zoom": 1.2125967659391788
     }
   },
   "description": "Connect the Dots, Craft Language.",
