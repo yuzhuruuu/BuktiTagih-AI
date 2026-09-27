@@ -94,5 +94,69 @@
     "expected_severity": "HIGH",
     "source": "Yusri",
     "notes": "Intimidasi psikologis tersirat, tidak ada ancaman eksplisit spesifik"
+  },
+  {
+    "id": 13,
+    "input": "Selamat! Anda mendapat kesempatan pinjaman baru bunga rendah 0%! Klik link berikut untuk klaim: bit.ly/pinjol-cepat",
+    "expected_category": "SPAM",
+    "expected_severity": "LOW",
+    "source": "Mahdi",
+    "notes": "Promosi pinjaman lain yang tidak terkait tagihan pengguna, mengandung link"
+  },
+  {
+    "id": 14,
+    "input": "Dapatkan pinjaman tanpa jaminan hingga 50 juta! Cair dalam 1 jam! Daftar sekarang juga sebelum kuota habis!",
+    "expected_category": "SPAM",
+    "expected_severity": "LOW",
+    "source": "Mahdi",
+    "notes": "Pesan promosi massal, bukan penagihan"
+  },
+  {
+    "id": 15,
+    "input": "Kalau besok belum ada transferan, kami kirim orang ke kantor kamu.",
+    "expected_category": "THREAT",
+    "expected_severity": "HIGH",
+    "source": "Mahdi",
+    "notes": "Ancaman bersyarat, mendatangi tempat kerja"
+  },
+  {
+    "id": 16,
+    "input": "Nomor HP dan alamat rumah kamu sudah kami kirim ke debt collector lapangan.",
+    "expected_category": "DATA_EXPOSURE",
+    "expected_severity": "HIGH",
+    "source": "Mahdi",
+    "notes": "Penyebaran data ke pihak ketiga, dinyatakan sudah terjadi, tanpa syarat"
+  },
+  {
+    "id": 17,
+    "input": "Sudah keberapa kali kami telpon, kamu selalu menghindar. Dasar tidak bertanggung jawab.",
+    "expected_category": "HARASSMENT",
+    "expected_severity": "MEDIUM",
+    "source": "Mahdi",
+    "notes": "Kata kasar dan tekanan berulang tanpa ancaman eksplisit - severity MEDIUM karena tidak menyebut alamat/keluarga"
+  },
+  {
+    "id": 18,
+    "input": "Terima kasih, pembayaran Anda bulan ini sudah kami terima. Jangan lupa cicilan bulan depan jatuh tempo tanggal 5.",
+    "expected_category": "NORMAL",
+    "expected_severity": "LOW",
+    "source": "Mahdi",
+    "notes": "Konfirmasi pembayaran + pengingat, tidak ada tekanan"
+  },
+  {
+    "id": 19,
+    "input": "Kalau tidak bayar minggu ini, foto kamu bakal kami sebar ke semua grup WA komplek kamu.",
+    "expected_category": "THREAT",
+    "expected_severity": "HIGH",
+    "source": "Mahdi",
+    "notes": "Ancaman bersyarat berisi penyebaran data/foto - tetap THREAT walau isinya soal data, sesuai aturan pembeda"
+  },
+  {
+    "id": 20,
+    "input": "Kalau kamu masih diem aja, ya udah tau sendiri nanti gimana.",
+    "expected_category": "THREAT",
+    "expected_severity": "MEDIUM",
+    "source": "Mahdi",
+    "notes": "EDGE CASE: pola bersyarat ada (kalau...) tapi konsekuensi tidak spesifik/vague. Menguji apakah model tetap ikut aturan 'ada syarat -> THREAT' walau isi ancamannya tidak jelas. Severity MEDIUM karena tidak ada ancaman konkret yang disebut"
   }
 ]
