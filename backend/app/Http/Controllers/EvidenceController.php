@@ -40,7 +40,21 @@ class EvidenceController extends Controller
 
         // Panggil Service AI dengan evidence_id yang sudah valid
         $aiService = new AiAnalysisService();
-        $aiResult = $aiService->analyzeDocument($evidenceId, $file->getRealPath());
+        $aiResult  = $aiService->analyzeDocument($evidenceId, $file->getRealPath());
+
+        // Jika Langflow mengembalikan hasil sukses, simpan ke tabel ai_analysis
+        if (($aiResult['status'] ?? '') === 'success') {
+            DB::table('ai_analysis')->insert([
+                'evidence_id'          => $evidenceId,
+                'category'             => $aiResult['category']             ?? 'PENDING',
+                'severity'             => $aiResult['severity']             ?? 'PENDING',
+                'reason'               => $aiResult['reason']               ?? null,
+                'confidence'           => $aiResult['confidence']           ?? 0,
+                'regulation_reference' => $aiResult['regulation_reference'] ?? null,
+                'created_at'           => now(),
+                'updated_at'           => now(),
+            ]);
+        }
 
         return response()->json([
             'evidence_id'   => $evidenceId,
@@ -127,7 +141,8 @@ class EvidenceController extends Controller
             'generated_at'   => now()->format('d F Y, H:i') . ' WIB',
             'category_label' => $categoryLabel[$analysis->category ?? 'PENDING'] ?? ($analysis->category ?? 'Menunggu Proses AI'),
             'severity_label' => $severityLabel[$analysis->severity ?? 'PENDING'] ?? ($analysis->severity ?? '-'),
-            'confidence_pct' => $analysis ? round(floatval($analysis->confidence) * 100) . '%' : '0%',
+            // confidence disimpan di DB skala 0–100 (bukan 0–1), langsung pakai tanpa dikali 100
+            'confidence_pct' => $analysis ? round(floatval($analysis->confidence)) . '%' : '0%',
         ];
 
         $pdf = Pdf::loadView('reports.evidence_report', $data)

@@ -25,8 +25,8 @@ File ini di-update setiap ada progres baru dan di-commit ke `docs/PROGRESS.md` s
 | Repo | github.com/yuzhuruuu/BuktiTagih-AI |
 | Lingkungan dev | IBM Bob (fork VSCode), Langflow lokal di `127.0.0.1:7860` |
 | Tools wajib hackathon | Langflow + IBM Bob (bukan watsonx/Granite) |
-| LLM | Gemini API (`gemini-3.8-flash`) |
-| Model di flow saat commit terakhir | ______ (isi manual: 3.8 Flash atau 3.6 Flash) |
+| LLM | Gemini API (`gemini-2.0-flash`) |
+| Model di flow saat commit terakhir | gemini-2.0-flash (konfirmasi Person A) |
 | Backend (keputusan Person B) | Laravel + MySQL, frontend HTML |
 
 **Ide dasar produk:** AI evidence assistant untuk korban penagihan pinjaman daring (pinjol) bermasalah. User upload screenshot/chat/call log, sistem mengekstrak dan mengklasifikasi bukti pelanggaran, (nanti) di-ground ke regulasi lewat RAG, lalu hasilnya menjadi laporan PDF untuk pengaduan ke OJK atau pihak berwajib.
@@ -42,7 +42,7 @@ Master reference document awalnya mengasumsikan **IBM Granite** sebagai reasonin
 
 **Keputusan final:** pakai Gemini, Granite di-drop dari implementasi. Setup watsonx.ai sempat dicoba tetapi model Granite instruct/chat tidak tersedia di plan akun (Lite/trial), dan memang tidak perlu diselesaikan.
 
-**Yang perlu diselaraskan:** laporan Person B masih menyebut "IBM Granite" di diagram alur dan rencana Bob. Person B perlu menggantinya menjadi Gemini.
+**Yang perlu diselaraskan:** laporan Person B masih menyebut "IBM Granite" di diagram alur dan rencana Bob. Person B perlu menggantinya menjadi Gemini. *(Komentar di `frontend/pages/bob.html` sudah diperbaiki — 25 Sep 2026)*
 
 ---
 
@@ -75,7 +75,7 @@ Master reference document awalnya mengasumsikan **IBM Granite** sebagai reasonin
 **Hari 6 — Gemini membaca gambar (screenshot)** `[SELESAI di Playground]`
 - Komponen input **tidak diganti**. Tetap memakai Chat Input, dengan screenshot dilampirkan lewat ikon klip di Playground. (Komponen File di Langflow untuk membaca dokumen, bukan untuk vision.)
 - Screenshot berisi teks berhasil dibaca dan dianalisis, keluaran JSON valid.
-- Uji lewat API (upload file lalu run) masih perlu dilakukan, lihat bagian Belum Dimulai.
+- Uji lewat API (upload file lalu run) sedang disiapkan Person A — lihat bagian Sedang Berjalan.
 
 **Hari 7 — Definisi kategori di prompt** `[SELESAI]`
 - Ditambahkan definisi dan aturan pembeda antar kategori:
@@ -94,43 +94,75 @@ Master reference document awalnya mengasumsikan **IBM Granite** sebagai reasonin
 
 **Catatan:** redaksi test case di log lama berbeda dari master doc (#2 "hati-hati", #4 ditambah "jika tidak bayar"). Dataset resmi memakai redaksi master doc.
 
+**Integrasi backend Person B (Langflow side)** `[SELESAI — sisi kode]`
+- `AiAnalysisService.php` diperbarui: alur dua langkah (upload file → run flow via tweaks Chat Input).
+- `EvidenceController.php` diperbarui: hasil Langflow langsung disimpan ke tabel `ai_analysis` setelah upload.
+- Fix kalkulasi `confidence_pct` di PDF report (skala 0–100, bukan 0–1).
+- Variabel `.env` baru: `LANGFLOW_FLOW_ID`, `LANGFLOW_CHAT_INPUT_ID` (nilai: `ChatInput-aPEX5`).
+- Migration baru: kolom `confidence` diubah dari `decimal(5,4)` → `decimal(5,2)`.
+- **Menunggu:** Person A kirim contoh respons JSON asli dari endpoint `/run` untuk verifikasi parsing.
+
 ---
 
 ## Status: SEDANG BERJALAN
 
-**Sinkronisasi dengan Person B** `[SEDANG BERJALAN]`
-- Sisi Person B: upload, hash SHA-256, halaman hasil, dan laporan PDF sudah berjalan (contoh Evidence #5). Hasil AI masih "Menunggu Proses AI" karena Langflow belum tersambung.
-- Person B menunggu: URL Langflow, Flow ID, API key, format request, format respons, dan kepastian siapa yang mengupdate DB.
-- Usulan dari Person A: backend Laravel menerima respons Langflow langsung lalu mengupdate tabel `ai_analysis` (Langflow `/run` bersifat sinkron, tidak perlu callback). Upload gambar lewat `/api/v1/files/upload/{FLOW_ID}`, lalu `/api/v1/run/{FLOW_ID}` dengan tweak `files` pada Chat Input.
+**Uji API Langflow — Person A** `[SEDANG BERJALAN]`
+- Person A sedang menyiapkan uji endpoint file upload + run via API (bukan Playground).
+- Setelah selesai, Person A akan kirim: contoh raw respons JSON dari `/run` ke Person B untuk verifikasi parsing di `parseRunResponse()`.
+
+**Keputusan arsitektur: Opsi A vs Opsi B** `[SELESAI — Opsi B dipilih]`
+- **Opsi A (callback):** Langflow memanggil endpoint Laravel setelah selesai.
+- **Opsi B (sinkron):** Laravel memanggil Langflow `/run`, langsung terima respons, update DB sendiri.
+- **Keputusan: Opsi B** — `/run` Langflow bersifat sinkron, tidak perlu callback. Backend Person B yang update DB. Sudah diimplementasi di `EvidenceController.php`.
+
+**Skala `confidence`** `[SELESAI — dikonfirmasi]`
+- Person A memakai skala 0–100. Kolom DB diubah ke `decimal(5,2)` agar bisa menampung nilai tersebut. Tidak ada konversi di service layer.
 
 ---
 
 ## Status: BELUM DIMULAI (Next Steps)
 
-**Uji API Langflow (lanjutan Hari 6)** `[BELUM DIMULAI]`
-Upload gambar lewat endpoint file, lalu run flow lewat API. Kirim ID komponen Chat Input dan contoh respons asli ke Person B.
+**Verifikasi parsing respons Langflow** `[BELUM DIMULAI — menunggu Person A]`
+- Setelah Person A selesai uji API, kirim contoh raw JSON dari `/run` ke Person B.
+- Person B verifikasi `parseRunResponse()` di `AiAnalysisService.php` cocok dengan struktur respons asli.
+- Lalu test end-to-end: upload via `POST /api/evidence/upload` → cek tabel `ai_analysis` terisi.
 
-**Hari 8 — Tambah 16 test case baru** `[BELUM DIMULAI]`
-Target minimum 20 test case (Bagian 8 dokumen master). Baru ada 4 dan belum ada satu pun kategori SPAM. Usul pembagian: 8 oleh Person A (termasuk SPAM), 8 oleh Person B. Format: `tests/evidence_cases/cases.json` (id, input, expected_category, expected_severity).
+**Hari 8 — Buat 16 test case baru** `[BELUM DIMULAI]`
+- Target minimum 20 test case (Bagian 8 dokumen master). Baru ada 4, belum ada satu pun SPAM.
+- **Pembagian yang disepakati: 8 oleh Person A (wajib include SPAM), 8 oleh Person B.**
+- Format file: `tests/evidence_cases/cases.json`
+  ```json
+  { "id": 5, "input": "...", "expected_category": "SPAM", "expected_severity": "LOW" }
+  ```
+- **Person B perlu membuat 8 test case** dengan distribusi: 2 HARASSMENT, 2 THREAT, 2 DATA_EXPOSURE, 1 NORMAL, 1 SPAM.
 
 **Hari 9 — Full testing 20 test case** `[BELUM DIMULAI]`
-Jalankan semua, ukur recall kategori (target ≥0,90), tuning prompt jika belum tercapai. Semua test memakai satu model yang sama.
+- Jalankan semua 20 case, ukur recall per kategori (target ≥0,90).
+- Tuning prompt Person A jika belum tercapai. Semua test memakai model yang sama.
 
 **Hari 10 — Cek metrik lain** `[BELUM DIMULAI]`
-F1 ekstraksi entity ≥0,90, kecepatan (100 pesan ≤3 menit; saat ini sekitar 17 detik per pesan), kebocoran PII nol.
+- F1 ekstraksi entity ≥0,90, kecepatan (100 pesan ≤3 menit; saat ini ~17 detik/pesan), kebocoran PII nol.
 
-**Perbaikan opsional prompt** `[BELUM DIMULAI]`
-Entity `actor` dan `victim` masih terisi kata ganti ("Kami", "kamu"). Tambahkan instruksi agar entity berisi nilai konkret (nama, nomor, organisasi, tanggal).
+**Perbaikan entity prompt — Person A** `[BELUM DIMULAI]`
+- Entity `actor` dan `victim` masih terisi kata ganti ("Kami", "kamu"). Perlu instruksi agar berisi nilai konkret.
 
-**Sprint 3–5** `[BELUM DIRENCANAKAN DETAIL]`
-Regulation Intelligence (RAG), Product Layer (sebagian besar sudah dikerjakan Person B), Bob assistant, testing, polish, dan persiapan submission.
+**Sprint 3 — RAG / Regulation Intelligence** `[BELUM DIMULAI]`
+- Isi `regulation_reference` dari knowledge base regulasi OJK (folder `knowledge_base/`).
+- Untuk submission minimal: `[]` sudah cukup. Untuk nilai lebih tinggi: RAG perlu jalan.
+- **Pembagian Sprint 3:** Person A mengintegrasikan RAG ke flow Langflow. Person B tidak perlu mengubah backend — kolom `regulation_reference` sudah ada dan siap terima string JSON.
+
+**Sprint 4–5 — Bob assistant, polish, submission** `[BELUM DIRENCANAKAN DETAIL]`
 
 ---
 
 ## Catatan Teknis
 
-- **Kuota Gemini gratis:** batas 5 permintaan per menit per model, dan error kuota (limit 20 permintaan) pernah muncul di `gemini-3.8-flash`. Person A dan Person B memakai API key dari project Google yang berbeda. Jangan kirim pesan beruntun saat uji di Playground.
-- **API key:** jangan commit key ke repo. Sebelum commit export flow, cek dengan `Select-String -Path langflow\*.json -Pattern "AIza"` (PowerShell). Jika ada hasil, revoke key dan buat baru.
+- **Flow ID & Component ID (dari `langflow/evidence_analysis_flow.json`):**
+  - Flow ID: `e05721f1-c3a2-4a33-bbd2-d30dee3df995`
+  - Chat Input Component ID: `ChatInput-aPEX5`
+  - Isi di `backend/.env`: `LANGFLOW_FLOW_ID` dan `LANGFLOW_CHAT_INPUT_ID`
+- **Kuota Gemini gratis:** batas 5 permintaan per menit. Person A dan Person B **wajib pakai API key dari Google project yang berbeda** agar tidak rebutan kuota saat testing bareng.
+- **API key:** jangan commit key ke repo. Sebelum commit export flow, cek: `Select-String -Path langflow\*.json -Pattern "AIza"` (PowerShell). Jika ada hasil, revoke key dan buat baru.
 - **Langflow lokal:** `127.0.0.1:7860` di laptop Person A tidak bisa dijangkau backend di laptop Person B. Person B mengimpor `langflow/evidence_analysis_flow.json` dan menjalankan Langflow sendiri untuk development. Untuk demo final, semua berjalan di satu mesin.
 
 ---
@@ -139,8 +171,9 @@ Regulation Intelligence (RAG), Product Layer (sebagian besar sudah dikerjakan Pe
 
 1. ~~Framework backend~~ → **Laravel** (Person B).
 2. ~~Tipe database~~ → **MySQL** (Person B).
-3. **Target metrik MVP** (F1 entity ≥0,90, recall kategori ≥0,90, PII bocor nol, 100 pesan ≤3 menit): perlu dikonfirmasi tim sebagai acuan testing.
-4. **Skala `confidence`:** Person A memakai 0–100. Person B perlu mengonfirmasi kolom DB.
+3. ~~Arsitektur integrasi Langflow~~ → **Opsi B: sinkron, Person B update DB** (disepakati 25 Sep 2026).
+4. ~~Skala `confidence`~~ → **0–100** sesuai output Langflow. Kolom DB sudah disesuaikan.
+5. **Target metrik MVP** (F1 entity ≥0,90, recall kategori ≥0,90, PII bocor nol, 100 pesan ≤3 menit): perlu dikonfirmasi tim sebagai acuan testing Hari 9–10.
 
 ---
 
@@ -152,4 +185,4 @@ Regulation Intelligence (RAG), Product Layer (sebagian besar sudah dikerjakan Pe
 
 ---
 
-*Terakhir diupdate: 24 September 2026, setelah Hari 6–7 selesai.*
+*Terakhir diupdate: 25 September 2026 — sinkronisasi update Person A (Hari 6–7 beres, uji API in progress) + implementasi integrasi Langflow sisi Person B selesai.*

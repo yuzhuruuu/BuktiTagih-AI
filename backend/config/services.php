@@ -36,9 +36,10 @@ return [
     ],
 
     'langflow' => [
-        'url'     => env('LANGFLOW_URL', 'http://localhost:7860'),
-        'flow_id' => env('LANGFLOW_FLOW_ID', ''),
-        'api_key' => env('LANGFLOW_API_KEY', ''),
+        'url'           => env('LANGFLOW_URL', 'http://localhost:7860'),
+        'flow_id'       => env('LANGFLOW_FLOW_ID', ''),
+        'api_key'       => env('LANGFLOW_API_KEY', ''),
+        'chat_input_id' => env('LANGFLOW_CHAT_INPUT_ID', 'ChatInput-0'),
     ],
 
 ];
