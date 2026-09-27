@@ -53,6 +53,30 @@ class AnalysisController extends Controller
         ], 200);
     }
 
+    // GET /api/analysis/by-evidence/{evidence_id}
+    // Dipakai frontend ketika hanya punya evidence_id (Langflow belum tersambung)
+    public function showByEvidence($evidenceId)
+    {
+        $analysis = AiAnalysis::with('evidence')
+            ->where('evidence_id', $evidenceId)
+            ->latest('analysis_id')
+            ->first();
+
+        if (!$analysis) {
+            return response()->json(['message' => 'Data analisis tidak ditemukan'], 404);
+        }
+
+        return response()->json([
+            'analysis_id'          => $analysis->analysis_id,
+            'category'             => $analysis->category,
+            'severity'             => $analysis->severity,
+            'reason'               => $analysis->reason,
+            'evidence'             => $analysis->evidence,
+            'regulation_reference' => $analysis->regulation_reference,
+            'confidence'           => $analysis->confidence,
+        ], 200);
+    }
+
     public function startAnalysis(Request $request)
     {
         // Ambil data 'evidence_id' yang dikirim dari Postman

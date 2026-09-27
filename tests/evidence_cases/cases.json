@@ -4,7 +4,7 @@
     "input": "Kalau tidak bayar hari ini, kami sebar data keluarga kamu.",
     "expected_category": "THREAT",
     "expected_severity": "HIGH",
-    "source": "Person A",
+    "source": "Mahdi",
     "notes": "Ancaman eksplisit bersyarat + penyebaran data keluarga"
   },
   {
@@ -12,7 +12,7 @@
     "input": "Kami tahu alamat rumah kamu. Tunggu saja.",
     "expected_category": "HARASSMENT",
     "expected_severity": "HIGH",
-    "source": "Person A",
+    "source": "Mahdi",
     "notes": "Intimidasi tersirat tanpa ancaman eksplisit"
   },
   {
@@ -20,7 +20,7 @@
     "input": "Tagihan Anda jatuh tempo besok. Silakan lakukan pembayaran.",
     "expected_category": "NORMAL",
     "expected_severity": "LOW",
-    "source": "Person A",
+    "source": "Mahdi",
     "notes": "Notifikasi tagihan biasa, tidak ada unsur ancaman"
   },
   {
@@ -28,7 +28,7 @@
     "input": "Kami kirim foto KTP Anda ke grup.",
     "expected_category": "DATA_EXPOSURE",
     "expected_severity": "HIGH",
-    "source": "Person A",
+    "source": "Mahdi",
     "notes": "Penyebaran data identitas tanpa syarat"
   },
   {
@@ -36,7 +36,7 @@
     "input": "Jika hutang kamu tidak dilunasi sebelum jam 12 malam ini, kami akan hubungi seluruh kontak di HP kamu dan beritahu mereka soal hutangmu.",
     "expected_category": "THREAT",
     "expected_severity": "HIGH",
-    "source": "Person B",
+    "source": "Yusri",
     "notes": "Ancaman eksplisit bersyarat: penagihan ke kontak luar"
   },
   {
@@ -44,7 +44,7 @@
     "input": "Bos kamu sudah kami hubungi. Atasan kamu tahu kamu punya hutang yang belum dibayar.",
     "expected_category": "DATA_EXPOSURE",
     "expected_severity": "HIGH",
-    "source": "Person B",
+    "source": "Yusri",
     "notes": "Penyebaran informasi hutang ke pihak ketiga (atasan) tanpa syarat"
   },
   {
@@ -52,7 +52,7 @@
     "input": "Bayar sekarang atau kami datang ke rumah kamu. Kami sudah tahu di mana kamu tinggal.",
     "expected_category": "THREAT",
     "expected_severity": "HIGH",
-    "source": "Person B",
+    "source": "Yusri",
     "notes": "Ancaman kedatangan fisik bersyarat, disertai intimidasi lokasi"
   },
   {
@@ -60,7 +60,7 @@
     "input": "Foto profil WhatsApp kamu beserta nama lengkap dan nomor pinjaman sudah kami bagikan ke grup Facebook.",
     "expected_category": "DATA_EXPOSURE",
     "expected_severity": "HIGH",
-    "source": "Person B",
+    "source": "Yusri",
     "notes": "Penyebaran data pribadi (foto, nama, nomor pinjaman) ke media sosial tanpa syarat"
   },
   {
@@ -68,7 +68,7 @@
     "input": "Dasar penipu! Mau kabur ya? Orang seperti kamu memang tidak punya malu. Malu-maluin keluarga!",
     "expected_category": "HARASSMENT",
     "expected_severity": "HIGH",
-    "source": "Person B",
+    "source": "Yusri",
     "notes": "Penghinaan dan bahasa kasar berulang tanpa ancaman eksplisit"
   },
   {
@@ -76,7 +76,7 @@
     "input": "Kami ingatkan kamu untuk segera melunasi cicilan bulan ini sebelum tanggal 30. Denda keterlambatan berlaku setelah jatuh tempo.",
     "expected_category": "NORMAL",
     "expected_severity": "LOW",
-    "source": "Person B",
+    "source": "Yusri",
     "notes": "Pengingat cicilan dengan informasi denda, tidak ada unsur ancaman atau intimidasi"
   },
   {
@@ -84,7 +84,7 @@
     "input": "Hei peminjam! Segera bayar hutangmu. Hei peminjam! Segera bayar hutangmu. Hei peminjam! Segera bayar hutangmu. [pesan dikirim 47 kali dalam 1 jam]",
     "expected_category": "SPAM",
     "expected_severity": "MEDIUM",
-    "source": "Person B",
+    "source": "Yusri",
     "notes": "Pengiriman pesan identik berulang masif dalam waktu singkat"
   },
   {
@@ -92,7 +92,7 @@
     "input": "Kamu pikir bisa lari? Kami punya orang di mana-mana. Lebih baik bayar sekarang sebelum terlambat.",
     "expected_category": "HARASSMENT",
     "expected_severity": "HIGH",
-    "source": "Person B",
+    "source": "Yusri",
     "notes": "Intimidasi psikologis tersirat, tidak ada ancaman eksplisit spesifik"
   }
 ]

@@ -1,121 +1,153 @@
 <!DOCTYPE html>
-<html lang="id" data-bs-theme="dark">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BuktiTagih AI — Bob Assistant</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>BuktiTagih — Bob Assistant</title>
     <style>
-        body { background-color: #0f1117; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .brand { font-weight: 700; letter-spacing: -0.5px; }
-        .brand span { color: #3b82f6; }
-
-        /* ── Chat window ── */
-        .chat-window {
-            height: calc(100vh - 210px);
-            min-height: 400px;
-            overflow-y: auto;
-            padding: 20px;
+        body {
+            font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #1f2328;
+            background: #f6f8fa;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            background: #0f1117;
         }
 
-        /* ── Bubbles ── */
-        .bubble {
-            max-width: 78%;
-            padding: 10px 15px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            line-height: 1.6;
-            white-space: pre-wrap;
-            word-break: break-word;
+        /* ── Nav ── */
+        nav {
+            background: #fff;
+            border-bottom: 1px solid #d0d7de;
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
         }
-        .bubble-bob {
-            background: #1c1f2e;
-            border: 1px solid #2a2d3e;
-            color: #c9d1d9;
-            align-self: flex-start;
-            border-bottom-left-radius: 4px;
+        .brand { font-weight: 700; font-size: 1.1rem; color: #1f2328; letter-spacing: -0.3px; }
+        .brand span { color: #1a7f64; }
+        .nav-right { display: flex; align-items: center; gap: 12px; }
+        .nav-label { font-size: 0.8rem; color: #57606a; }
+        .btn-back {
+            font-size: 0.82rem;
+            color: #57606a;
+            text-decoration: none;
+            border: 1px solid #d0d7de;
+            padding: 5px 12px;
+            border-radius: 6px;
+            background: #fff;
         }
-        .bubble-user {
-            background: #1e3a5f;
-            border: 1px solid #2a4a7f;
-            color: #e0eeff;
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
-        }
-        .bubble-system {
-            background: #1a2e1a;
-            border: 1px solid #2a5a2a;
-            color: #86efac;
-            align-self: center;
+        .btn-back:hover { background: #f6f8fa; color: #1f2328; }
+
+        /* ── Context strip ── */
+        .context-strip {
+            background: #ddf4ff;
+            border-bottom: 1px solid #80ccff;
+            padding: 8px 24px;
             font-size: 0.8rem;
-            text-align: center;
-            border-radius: 20px;
-            padding: 5px 16px;
+            color: #0550ae;
+            display: none;
+            flex-shrink: 0;
+        }
+        .context-strip.show { display: block; }
+        .context-strip strong { font-weight: 600; }
+
+        /* ── Chat wrapper ── */
+        .chat-wrapper {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-width: 760px;
+            width: 100%;
+            margin: 0 auto;
         }
 
-        .bubble-label {
-            font-size: 0.7rem;
+        /* ── Messages ── */
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .msg-row { display: flex; flex-direction: column; }
+        .msg-row.user { align-items: flex-end; }
+        .msg-row.bob  { align-items: flex-start; }
+
+        .msg-label {
+            font-size: 0.72rem;
             font-weight: 700;
             letter-spacing: 0.06em;
             text-transform: uppercase;
             margin-bottom: 4px;
+            color: #57606a;
         }
-        .label-bob  { color: #3b82f6; }
-        .label-user { color: #93c5fd; text-align: right; }
 
-        /* Typing indicator */
-        .typing span {
+        .bubble {
+            max-width: 72%;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            line-height: 1.65;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .bubble.bob-bubble {
+            background: #fff;
+            border: 1px solid #d0d7de;
+            border-bottom-left-radius: 3px;
+            color: #1f2328;
+        }
+        .bubble.user-bubble {
+            background: #1a7f64;
+            color: #fff;
+            border-bottom-right-radius: 3px;
+        }
+        .bubble.system-bubble {
+            background: #dafbe1;
+            border: 1px solid #aceebb;
+            color: #116329;
+            font-size: 0.8rem;
+            align-self: center;
+            border-radius: 20px;
+            padding: 5px 14px;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        /* Typing dots */
+        .typing-dots span {
             display: inline-block;
-            width: 7px; height: 7px;
-            margin: 0 2px;
-            background: #7a8499;
+            width: 6px; height: 6px;
+            background: #57606a;
             border-radius: 50%;
+            margin: 0 2px;
             animation: bounce 1.2s infinite;
         }
-        .typing span:nth-child(2) { animation-delay: 0.2s; }
-        .typing span:nth-child(3) { animation-delay: 0.4s; }
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
         @keyframes bounce {
             0%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-7px); }
+            40% { transform: translateY(-5px); }
         }
 
-        /* ── Input bar ── */
-        .input-bar {
-            background: #1c1f2e;
-            border-top: 1px solid #2a2d3e;
-            padding: 14px 20px;
-        }
-        .chat-input {
-            background: #252839;
-            border: 1px solid #3a3f52;
-            color: #c9d1d9;
-            border-radius: 8px;
-            resize: none;
-            font-size: 0.9rem;
-        }
-        .chat-input:focus {
-            background: #2e3248;
-            border-color: #3b82f6;
-            color: #e6edf3;
-            box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
-            outline: none;
-        }
-        .chat-input::placeholder { color: #555f73; }
-
-        /* Context strip */
-        .context-strip {
-            background: #12192e;
-            border: 1px solid #1e2d4a;
-            border-radius: 8px;
-            padding: 8px 14px;
-            font-size: 0.78rem;
-            color: #93c5fd;
-            margin-bottom: 12px;
+        /* ── Input area ── */
+        .input-area {
+            background: #fff;
+            border-top: 1px solid #d0d7de;
+            padding: 14px 16px;
+            flex-shrink: 0;
+            max-width: 760px;
+            width: 100%;
+            margin: 0 auto;
         }
 
         /* Quick replies */
@@ -123,208 +155,184 @@
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
-            margin-top: 8px;
+            margin-bottom: 10px;
         }
         .qr-btn {
-            background: #1c1f2e;
-            border: 1px solid #3a3f52;
-            color: #93c5fd;
+            background: #f6f8fa;
+            border: 1px solid #d0d7de;
+            color: #1f2328;
             border-radius: 16px;
             padding: 4px 12px;
             font-size: 0.78rem;
             cursor: pointer;
-            transition: background 0.15s;
+            transition: background 0.12s, border-color 0.12s;
         }
-        .qr-btn:hover { background: #252839; }
+        .qr-btn:hover { background: #eaeef2; border-color: #b0b7bf; }
+
+        .input-row { display: flex; gap: 8px; align-items: flex-end; }
+        textarea {
+            flex: 1;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            padding: 9px 12px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            color: #1f2328;
+            resize: none;
+            background: #f6f8fa;
+            line-height: 1.5;
+        }
+        textarea:focus { outline: none; border-color: #1a7f64; background: #fff; }
+        textarea::placeholder { color: #8c959f; }
+
+        .btn-send {
+            background: #1a7f64;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 9px 18px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.12s;
+        }
+        .btn-send:hover:not(:disabled) { background: #156b54; }
+        .btn-send:disabled { background: #94d3c2; cursor: not-allowed; }
+
+        .input-hint { font-size: 0.72rem; color: #8c959f; margin-top: 6px; }
     </style>
 </head>
-<body class="text-light d-flex flex-column" style="height:100vh;">
+<body>
 
-<!-- Navbar -->
-<nav class="navbar navbar-dark px-4 py-3 flex-shrink-0" style="background:#0f1117; border-bottom:1px solid #2a2d3e;">
-    <span class="brand fs-5">Bukti<span>Tagih</span> AI</span>
-    <div class="d-flex align-items-center gap-3">
-        <span class="small text-muted">Bob — Investigation Assistant</span>
-        <a id="backToResult" href="upload.html" class="btn btn-sm btn-outline-secondary">← Kembali</a>
+<nav>
+    <span class="brand">Bukti<span>Tagih</span></span>
+    <div class="nav-right">
+        <span class="nav-label">Bob — Asisten Analisis</span>
+        <a id="backToResult" href="upload.html" class="btn-back">← Kembali</a>
     </div>
 </nav>
 
-<!-- Context strip (muncul kalau ada analysis_id di URL) -->
-<div class="container-fluid px-4 pt-3 flex-shrink-0" style="max-width:800px; margin:0 auto; width:100%;">
-    <div class="context-strip d-none" id="contextStrip">
-        📋 Konteks aktif: Analysis ID <strong id="ctxAnalysisId">—</strong>
-        &nbsp;·&nbsp; Kamu sedang mendiskusikan hasil analisis bukti ini dengan Bob.
-    </div>
+<div class="context-strip" id="contextStrip">
+    Konteks aktif: Analysis <strong id="ctxAnalysisId">—</strong>
+    &nbsp;·&nbsp; Kamu sedang mendiskusikan hasil analisis ini bersama Bob.
 </div>
 
-<!-- Chat Window -->
-<div class="flex-grow-1 overflow-hidden" style="max-width:800px; margin:0 auto; width:100%;">
-    <div class="chat-window" id="chatWindow">
-        <!-- Pesan awal Bob di-inject oleh JS -->
-    </div>
-</div>
+<div class="chat-wrapper">
+    <div class="messages" id="messages"></div>
 
-<!-- Input Bar -->
-<div class="input-bar flex-shrink-0" style="max-width:800px; margin:0 auto; width:100%;">
-
-    <!-- Quick replies -->
-    <div class="quick-replies mb-2" id="quickReplies">
-        <button class="qr-btn" data-msg="Apa itu kategori HARASSMENT?">Apa itu HARASSMENT?</button>
-        <button class="qr-btn" data-msg="Apa yang harus saya lakukan setelah dapat hasil ini?">Langkah selanjutnya?</button>
-        <button class="qr-btn" data-msg="Bagaimana cara melaporkan ke OJK?">Cara lapor ke OJK?</button>
-        <button class="qr-btn" data-msg="Apa itu DATA_EXPOSURE?">Apa itu DATA_EXPOSURE?</button>
-        <button class="qr-btn" data-msg="Regulasi apa yang dilanggar?">Regulasi yang dilanggar?</button>
-    </div>
-
-    <div class="d-flex gap-2 align-items-end">
-        <textarea class="form-control chat-input flex-grow-1" id="chatInput"
-                  rows="2" placeholder="Tanyakan sesuatu tentang hasil analisis atau situasi kamu…"
-                  maxlength="1000"></textarea>
-        <button class="btn btn-primary px-4 py-2" id="sendBtn" style="height:fit-content;">
-            Kirim
-        </button>
-    </div>
-    <div class="small text-muted mt-1" style="font-size:0.72rem;">
-        Bob adalah AI assistant untuk membantu memahami hasil analisis. Bukan pengganti nasihat hukum.
+    <div class="input-area">
+        <div class="quick-replies" id="quickReplies">
+            <button class="qr-btn" data-msg="Apa itu kategori HARASSMENT?">Apa itu HARASSMENT?</button>
+            <button class="qr-btn" data-msg="Apa langkah selanjutnya yang harus saya lakukan?">Langkah selanjutnya?</button>
+            <button class="qr-btn" data-msg="Bagaimana cara melaporkan ke OJK?">Cara lapor ke OJK?</button>
+            <button class="qr-btn" data-msg="Apa itu DATA_EXPOSURE?">Apa itu DATA_EXPOSURE?</button>
+            <button class="qr-btn" data-msg="Regulasi apa yang dilanggar?">Regulasi yang dilanggar?</button>
+        </div>
+        <div class="input-row">
+            <textarea id="chatInput" rows="2"
+                placeholder="Tanyakan tentang hasil analisis atau situasimu…"
+                maxlength="1000"></textarea>
+            <button class="btn-send" id="sendBtn">Kirim</button>
+        </div>
+        <div class="input-hint">Bob adalah asisten AI — bukan pengganti nasihat hukum profesional.</div>
     </div>
 </div>
 
 <script>
-// ─── Config ────────────────────────────────────────────────────────────────
-const API_BASE = 'http://127.0.0.1:8000/api';
-
-// ─── Query params ──────────────────────────────────────────────────────────
+const API_BASE   = 'http://127.0.0.1:8000/api';
 const params     = new URLSearchParams(window.location.search);
 const analysisId = params.get('analysis_id');
 
-// ─── DOM refs ──────────────────────────────────────────────────────────────
-const chatWindow  = document.getElementById('chatWindow');
-const chatInput   = document.getElementById('chatInput');
-const sendBtn     = document.getElementById('sendBtn');
+const messagesEl   = document.getElementById('messages');
+const chatInput    = document.getElementById('chatInput');
+const sendBtn      = document.getElementById('sendBtn');
 const contextStrip = document.getElementById('contextStrip');
-const ctxAnalysisId = document.getElementById('ctxAnalysisId');
-const backToResult  = document.getElementById('backToResult');
-const quickReplies  = document.getElementById('quickReplies');
+const ctxId        = document.getElementById('ctxAnalysisId');
+const backBtn      = document.getElementById('backToResult');
+const quickReplies = document.getElementById('quickReplies');
 
-// ─── Context ───────────────────────────────────────────────────────────────
-let analysisContext = null;  // data dari GET /analysis/{id}
+let analysisContext = null;
 
 if (analysisId) {
-    ctxAnalysisId.textContent = analysisId;
-    contextStrip.classList.remove('d-none');
-    backToResult.href = `result.html?analysis_id=${analysisId}`;
+    ctxId.textContent = analysisId;
+    contextStrip.classList.add('show');
+    backBtn.href = `result.html?analysis_id=${analysisId}`;
 }
 
-// ─── Knowledge base Bob (lokal, sebelum Langflow terhubung) ────────────────
-// Ini adalah pengetahuan statis Bob untuk menjawab pertanyaan umum.
+// ─── Knowledge base Bob ──────────────────────────────────────────────────
 // Nanti digantikan dengan panggilan ke Langflow + Gemini API.
-const BOB_KNOWLEDGE = {
-    HARASSMENT: `Kategori **HARASSMENT** (Intimidasi) berarti bukti kamu mengandung indikasi perilaku intimidatif dari pihak penagih — misalnya ancaman verbal, bahasa kasar berulang, atau tekanan psikologis yang berlebihan.\n\nIni melanggar:\n• POJK No. 22/POJK.07/2020 — Perlindungan Konsumen Sektor Jasa Keuangan\n• AFPI Code of Conduct — larangan penagihan yang merendahkan martabat`,
-
-    THREAT: `Kategori **THREAT** (Ancaman) berarti terdapat ancaman nyata dalam bukti kamu — misalnya ancaman penyebaran data, ancaman fisik, atau ancaman hukum yang tidak berdasar.\n\nIni melanggar:\n• KUHP Pasal 335 — perbuatan tidak menyenangkan / ancaman\n• UU ITE Pasal 29 — ancaman kekerasan melalui media elektronik\n• POJK No. 22/POJK.07/2020`,
-
-    DATA_EXPOSURE: `Kategori **DATA_EXPOSURE** (Kebocoran Data) berarti pihak penagih mengancam atau melakukan penyebaran data pribadimu — seperti KTP, foto, nomor telepon keluarga, atau informasi sensitif lainnya.\n\nIni melanggar:\n• UU No. 27 Tahun 2022 tentang Perlindungan Data Pribadi (UU PDP)\n• POJK No. 1/POJK.07/2013 — kerahasiaan data konsumen`,
-
-    SPAM: `Kategori **SPAM** berarti terdapat pengiriman pesan berulang secara masif yang melampaui batas wajar — misalnya ratusan pesan dalam sehari atau penagihan ke kontak di luar daftar yang kamu berikan.\n\nIni melanggar:\n• AFPI Code of Conduct — penagihan hanya boleh dilakukan pada jam tertentu\n• POJK tentang pembatasan frekuensi kontak penagihan`,
-
-    NORMAL: `Kategori **NORMAL** berarti AI tidak menemukan indikasi pelanggaran dalam bukti yang kamu upload.\n\nJika kamu merasa ada yang tidak beres, coba upload bukti lain yang lebih spesifik, atau ceritakan situasimu lebih detail.`,
-
-    ojk: `Cara melaporkan ke OJK:\n\n1. Kunjungi: **ojk.go.id** atau aplikasi **Appek OJK**\n2. Pilih menu "Pengaduan"\n3. Siapkan: KTP, bukti penagihan, laporan PDF dari BuktiTagih AI\n4. Isi form pengaduan dengan kronologi kejadian\n5. OJK akan menindaklanjuti dalam 20 hari kerja\n\nBisa juga hubungi: 📞 157 (hotline OJK)`,
-
-    afpi: `AFPI (Asosiasi Fintech Pendanaan Bersama Indonesia) menerima pengaduan terkait anggotanya:\n\n1. Website: **afpi.or.id**\n2. Email: **pengaduan@afpi.or.id**\n3. Sertakan laporan PDF dari BuktiTagih AI sebagai bukti pendukung`,
-
-    next_steps: `Langkah yang disarankan setelah menerima hasil analisis:\n\n1. **Download laporan PDF** dari halaman hasil\n2. **Simpan semua bukti asli** (screenshot, rekaman)\n3. **Laporkan ke OJK** (ojk.go.id atau 157)\n4. **Laporkan ke AFPI** jika pinjolnya terdaftar AFPI\n5. **Konsultasi ke LBH** (Lembaga Bantuan Hukum) terdekat jika kasusnya serius\n6. **Blokir nomor** penagih setelah bukti sudah dikumpulkan`,
-
-    default: `Saya Bob, AI investigation assistant BuktiTagih.\n\nSaya bisa membantu kamu memahami:\n• Hasil klasifikasi AI (HARASSMENT, THREAT, DATA_EXPOSURE, SPAM)\n• Regulasi yang dilanggar\n• Langkah tindak lanjut ke OJK / AFPI\n• Cara menggunakan laporan PDF\n\nCoba tanyakan sesuatu yang lebih spesifik, atau gunakan tombol cepat di bawah.`
+const BOB_KB = {
+    HARASSMENT: `Kategori **Intimidasi (HARASSMENT)** berarti bukti kamu mengandung perilaku intimidatif dari pihak penagih — misalnya ancaman verbal, bahasa kasar berulang, atau tekanan psikologis yang berlebihan.\n\nIni melanggar:\n• POJK No. 22/POJK.07/2020 — Perlindungan Konsumen Sektor Jasa Keuangan\n• AFPI Code of Conduct — larangan penagihan yang merendahkan martabat`,
+    THREAT:     `Kategori **Ancaman (THREAT)** berarti terdapat ancaman nyata dalam bukti kamu — misalnya ancaman penyebaran data, ancaman fisik, atau ancaman hukum yang tidak berdasar.\n\nIni melanggar:\n• KUHP Pasal 335 — perbuatan tidak menyenangkan / ancaman\n• UU ITE Pasal 29 — ancaman kekerasan melalui media elektronik\n• POJK No. 22/POJK.07/2020`,
+    DATA_EXPOSURE: `Kategori **Kebocoran Data (DATA_EXPOSURE)** berarti pihak penagih mengancam atau melakukan penyebaran data pribadimu — seperti KTP, foto, nomor telepon keluarga, atau informasi sensitif lainnya.\n\nIni melanggar:\n• UU No. 27 Tahun 2022 tentang Perlindungan Data Pribadi (UU PDP)\n• POJK No. 1/POJK.07/2013 — kerahasiaan data konsumen`,
+    SPAM:       `Kategori **Spam** berarti terdapat pengiriman pesan berulang secara masif yang melampaui batas wajar — misalnya ratusan pesan dalam sehari atau penagihan ke kontak di luar daftar yang kamu berikan.\n\nIni melanggar:\n• AFPI Code of Conduct — penagihan hanya boleh dilakukan pada jam tertentu\n• POJK tentang pembatasan frekuensi kontak penagihan`,
+    NORMAL:     `Kategori **Normal** berarti sistem tidak menemukan indikasi pelanggaran dalam bukti yang kamu upload.\n\nJika kamu merasa ada yang tidak beres, coba upload bukti lain yang lebih spesifik, atau ceritakan situasimu lebih detail.`,
+    ojk:        `Cara melaporkan ke OJK:\n\n1. Kunjungi **ojk.go.id** atau aplikasi Appek OJK\n2. Pilih menu "Pengaduan"\n3. Siapkan: KTP, bukti penagihan, laporan PDF dari BuktiTagih\n4. Isi form pengaduan dengan kronologi kejadian\n5. OJK akan menindaklanjuti dalam 20 hari kerja\n\nBisa juga hubungi hotline OJK: 157`,
+    afpi:       `AFPI (Asosiasi Fintech Pendanaan Bersama Indonesia) menerima pengaduan terkait anggotanya:\n\n1. Website: afpi.or.id\n2. Email: pengaduan@afpi.or.id\n3. Sertakan laporan PDF dari BuktiTagih sebagai bukti pendukung`,
+    next_steps: `Langkah yang disarankan setelah menerima hasil analisis:\n\n1. Download laporan PDF dari halaman hasil\n2. Simpan semua bukti asli (screenshot, rekaman)\n3. Laporkan ke OJK melalui ojk.go.id atau hubungi 157\n4. Laporkan ke AFPI jika pinjolnya terdaftar AFPI\n5. Konsultasi ke LBH (Lembaga Bantuan Hukum) terdekat jika kasus serius\n6. Blokir nomor penagih setelah semua bukti sudah dikumpulkan`,
+    default:    `Saya Bob, asisten analisis BuktiTagih.\n\nSaya bisa membantu kamu memahami:\n• Hasil klasifikasi AI (Intimidasi, Ancaman, Kebocoran Data, Spam)\n• Regulasi yang dilanggar\n• Langkah tindak lanjut ke OJK atau AFPI\n• Cara menggunakan laporan PDF\n\nCoba gunakan tombol cepat di bawah, atau tanyakan langsung.`
 };
 
-function getBobResponse(userMsg) {
-    const msg = userMsg.toLowerCase();
-
-    if (msg.includes('harassment') || msg.includes('intimidasi'))
-        return BOB_KNOWLEDGE.HARASSMENT;
-    if (msg.includes('threat') || msg.includes('ancaman'))
-        return BOB_KNOWLEDGE.THREAT;
-    if (msg.includes('data_exposure') || msg.includes('data exposure') || msg.includes('kebocoran'))
-        return BOB_KNOWLEDGE.DATA_EXPOSURE;
-    if (msg.includes('spam'))
-        return BOB_KNOWLEDGE.SPAM;
-    if (msg.includes('normal') && msg.includes('kategori'))
-        return BOB_KNOWLEDGE.NORMAL;
-    if (msg.includes('ojk') || msg.includes('lapor') || msg.includes('pengaduan'))
-        return BOB_KNOWLEDGE.ojk;
-    if (msg.includes('afpi'))
-        return BOB_KNOWLEDGE.afpi;
-    if (msg.includes('selanjutnya') || msg.includes('langkah') || msg.includes('harus'))
-        return BOB_KNOWLEDGE.next_steps;
-    if (msg.includes('regulasi') || msg.includes('aturan') || msg.includes('pasal') || msg.includes('dilanggar')) {
-        if (analysisContext) {
-            const cat = analysisContext.category;
-            if (BOB_KNOWLEDGE[cat]) return BOB_KNOWLEDGE[cat];
-        }
-        return `Untuk melihat regulasi yang relevan, kamu bisa lihat detail di halaman hasil analisis. Atau tanyakan kategori spesifik, misal "regulasi HARASSMENT".`;
+function getBobReply(msg) {
+    const m = msg.toLowerCase();
+    if (m.includes('harassment') || m.includes('intimidasi')) return BOB_KB.HARASSMENT;
+    if (m.includes('threat') || m.includes('ancaman'))        return BOB_KB.THREAT;
+    if (m.includes('data_exposure') || m.includes('data exposure') || m.includes('kebocoran')) return BOB_KB.DATA_EXPOSURE;
+    if (m.includes('spam'))                                    return BOB_KB.SPAM;
+    if (m.includes('normal') && m.includes('kategori'))        return BOB_KB.NORMAL;
+    if (m.includes('ojk') || m.includes('lapor') || m.includes('pengaduan')) return BOB_KB.ojk;
+    if (m.includes('afpi'))                                    return BOB_KB.afpi;
+    if (m.includes('selanjutnya') || m.includes('langkah') || m.includes('harus')) return BOB_KB.next_steps;
+    if (m.includes('regulasi') || m.includes('aturan') || m.includes('pasal') || m.includes('dilanggar')) {
+        if (analysisContext?.category && BOB_KB[analysisContext.category]) return BOB_KB[analysisContext.category];
+        return 'Untuk melihat regulasi yang relevan, lihat detail di halaman hasil analisis. Atau tanyakan kategori spesifik, misal "regulasi HARASSMENT".';
     }
-
-    // Kalau ada context analisis, kasih respon yang relevan
-    if (analysisContext && (msg.includes('hasil') || msg.includes('analisis') || msg.includes('maksud'))) {
+    if (analysisContext && (m.includes('hasil') || m.includes('analisis') || m.includes('maksud'))) {
         const cat = analysisContext.category;
-        if (BOB_KNOWLEDGE[cat]) {
-            return `Berdasarkan analisis bukti kamu (kategori: **${cat}**):\n\n${BOB_KNOWLEDGE[cat]}`;
-        }
+        if (BOB_KB[cat]) return `Berdasarkan hasil analisis bukti kamu (kategori: **${cat}**):\n\n${BOB_KB[cat]}`;
     }
-
-    return BOB_KNOWLEDGE.default;
+    return BOB_KB.default;
 }
 
-// ─── Render bubble ─────────────────────────────────────────────────────────
-function addBubble(role, text) {
-    const wrapper = document.createElement('div');
+// ─── Render helpers ──────────────────────────────────────────────────────
+function addMessage(role, text) {
+    const row = document.createElement('div');
+    row.className = `msg-row ${role === 'user' ? 'user' : role === 'system' ? '' : 'bob'}`;
 
     if (role === 'system') {
-        wrapper.innerHTML = `<div class="bubble bubble-system">${text}</div>`;
+        row.innerHTML = `<div class="bubble system-bubble">${text}</div>`;
     } else {
-        const label = role === 'bob'
-            ? `<div class="bubble-label label-bob">Bob</div>`
-            : `<div class="bubble-label label-user">Kamu</div>`;
-
-        const cls = role === 'bob' ? 'bubble-bob' : 'bubble-user';
-
-        // Format **bold**
-        const formatted = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                              .replace(/\n/g, '<br>');
-
-        wrapper.innerHTML = `
-            <div style="display:flex; flex-direction:column; align-items:${role === 'bob' ? 'flex-start' : 'flex-end'};">
-                ${label}
-                <div class="bubble ${cls}">${formatted}</div>
-            </div>`;
+        const labelText = role === 'bob' ? 'Bob' : 'Kamu';
+        const bubbleCls = role === 'bob' ? 'bob-bubble' : 'user-bubble';
+        const formatted = text
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
+        row.innerHTML = `
+            <div class="msg-label">${labelText}</div>
+            <div class="bubble ${bubbleCls}">${formatted}</div>`;
     }
 
-    chatWindow.appendChild(wrapper);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-    return wrapper;
+    messagesEl.appendChild(row);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return row;
 }
 
 function addTyping() {
-    const wrapper = document.createElement('div');
-    wrapper.id = 'typing-indicator';
-    wrapper.innerHTML = `
-        <div style="display:flex; flex-direction:column; align-items:flex-start;">
-            <div class="bubble-label label-bob">Bob</div>
-            <div class="bubble bubble-bob typing">
-                <span></span><span></span><span></span>
-            </div>
+    const row = document.createElement('div');
+    row.id = 'typing';
+    row.className = 'msg-row bob';
+    row.innerHTML = `
+        <div class="msg-label">Bob</div>
+        <div class="bubble bob-bubble typing-dots">
+            <span></span><span></span><span></span>
         </div>`;
-    chatWindow.appendChild(wrapper);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
+    messagesEl.appendChild(row);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
 }
+function removeTyping() { document.getElementById('typing')?.remove(); }
 
-function removeTyping() {
-    const el = document.getElementById('typing-indicator');
-    if (el) el.remove();
-}
-
-// ─── Send message ──────────────────────────────────────────────────────────
+// ─── Send ────────────────────────────────────────────────────────────────
 async function sendMessage(text) {
     const msg = text.trim();
     if (!msg) return;
@@ -333,67 +341,52 @@ async function sendMessage(text) {
     sendBtn.disabled = true;
     quickReplies.style.display = 'none';
 
-    addBubble('user', msg);
+    addMessage('user', msg);
     addTyping();
 
-    // Simulasi delay berpikir (akan digantikan panggilan ke Langflow nanti)
-    await new Promise(r => setTimeout(r, 700 + Math.random() * 600));
+    await new Promise(r => setTimeout(r, 600 + Math.random() * 500));
 
     removeTyping();
-    const reply = getBobResponse(msg);
-    addBubble('bob', reply);
-
+    addMessage('bob', getBobReply(msg));
     sendBtn.disabled = false;
     chatInput.focus();
 }
 
-// ─── Event listeners ───────────────────────────────────────────────────────
 sendBtn.addEventListener('click', () => sendMessage(chatInput.value));
-
 chatInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage(chatInput.value);
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(chatInput.value); }
 });
-
 quickReplies.querySelectorAll('.qr-btn').forEach(btn => {
     btn.addEventListener('click', () => sendMessage(btn.dataset.msg));
 });
 
-// ─── Init ──────────────────────────────────────────────────────────────────
+// ─── Init ────────────────────────────────────────────────────────────────
 async function init() {
-    // Pesan selamat datang
-    let welcome = `Halo! Saya **Bob**, investigation assistant BuktiTagih AI.\n\nSaya di sini untuk membantu kamu memahami hasil analisis bukti dan menjelaskan langkah selanjutnya yang bisa kamu ambil.`;
+    let welcome = `Halo! Saya **Bob**, asisten analisis BuktiTagih.\n\nSaya di sini untuk membantu kamu memahami hasil analisis dan menjelaskan langkah selanjutnya yang bisa kamu ambil.`;
 
-    // Kalau ada analysis_id, fetch konteks analisis dulu
     if (analysisId) {
         try {
-            const res  = await fetch(`${API_BASE}/analysis/${analysisId}`, {
+            const res = await fetch(`${API_BASE}/analysis/${analysisId}`, {
                 headers: { 'Accept': 'application/json' }
             });
             if (res.ok) {
                 analysisContext = await res.json();
                 const cat = analysisContext.category;
                 if (cat && cat !== 'PENDING') {
-                    welcome += `\n\nSaya sudah baca hasil analisis kamu: bukti diidentifikasi sebagai **${cat}**. Mau saya jelaskan apa artinya?`;
+                    welcome += `\n\nSaya sudah membaca hasil analisis: bukti diidentifikasi sebagai **${cat}**. Mau saya jelaskan lebih lanjut?`;
                 } else {
-                    welcome += `\n\nHasil analisis kamu masih dalam proses (PENDING). Kamu tetap bisa tanya-tanya seputar kategori pelanggaran atau langkah tindak lanjut.`;
+                    welcome += `\n\nHasil analisis masih diproses. Kamu tetap bisa bertanya seputar kategori pelanggaran atau langkah tindak lanjut.`;
                 }
             }
-        } catch (_) {
-            // Kalau fetch gagal, lanjut dengan pesan default
-        }
+        } catch (_) {}
     } else {
-        welcome += `\n\nKamu bisa tanya tentang kategori pelanggaran (HARASSMENT, THREAT, DATA_EXPOSURE, SPAM), regulasi yang berlaku, atau cara melaporkan ke OJK/AFPI.`;
+        welcome += `\n\nKamu bisa tanya tentang kategori pelanggaran, regulasi yang berlaku, atau cara melaporkan ke OJK dan AFPI.`;
     }
 
-    addBubble('bob', welcome);
+    addMessage('bob', welcome);
 }
 
 init();
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

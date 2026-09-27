@@ -1,228 +1,298 @@
 <!DOCTYPE html>
-<html lang="id" data-bs-theme="dark">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BuktiTagih AI — Hasil Analisis</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>BuktiTagih — Hasil Analisis</title>
     <style>
-        body { background-color: #0f1117; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .brand { font-weight: 700; letter-spacing: -0.5px; }
-        .brand span { color: #3b82f6; }
-
-        .result-card {
-            background: #1c1f2e;
-            border: 1px solid #2a2d3e;
-            border-radius: 12px;
+        body {
+            font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #1f2328;
+            background: #f6f8fa;
+            min-height: 100vh;
         }
 
+        /* ── Nav ── */
+        nav {
+            background: #fff;
+            border-bottom: 1px solid #d0d7de;
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .brand { font-weight: 700; font-size: 1.1rem; color: #1f2328; letter-spacing: -0.3px; }
+        .brand span { color: #1a7f64; }
+        .btn-back {
+            font-size: 0.82rem;
+            color: #57606a;
+            text-decoration: none;
+            border: 1px solid #d0d7de;
+            padding: 5px 12px;
+            border-radius: 6px;
+            background: #fff;
+        }
+        .btn-back:hover { background: #f6f8fa; color: #1f2328; }
+
+        /* ── Layout ── */
+        .page { max-width: 680px; margin: 40px auto; padding: 0 16px 48px; }
+
+        .page-header { margin-bottom: 24px; }
+        .page-header h1 { font-size: 1.25rem; font-weight: 700; margin-bottom: 4px; }
+        .page-header .sub { font-size: 0.82rem; color: #57606a; }
+
+        /* ── Card ── */
+        .card {
+            background: #fff;
+            border: 1px solid #d0d7de;
+            border-radius: 10px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
         .section-label {
-            font-size: 0.7rem;
+            font-size: 0.72rem;
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: #7a8499;
-            margin-bottom: 6px;
+            color: #57606a;
+            margin-bottom: 12px;
         }
 
-        /* Severity badge */
-        .badge-severity {
+        /* ── Verdict banner ── */
+        .verdict-banner {
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #d0d7de;
+            background: #f6f8fa;
+        }
+        .verdict-banner.high   { border-left-color: #cf222e; background: #fff5f5; }
+        .verdict-banner.medium { border-left-color: #bf8700; background: #fffbdd; }
+        .verdict-banner.low    { border-left-color: #1a7f64; background: #f0fff4; }
+        .verdict-banner.pending{ border-left-color: #d0d7de; background: #f6f8fa; }
+
+        .verdict-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+        .badge-cat {
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             font-weight: 700;
-            letter-spacing: 0.04em;
+            padding: 3px 12px;
+            border-radius: 20px;
+            background: #eaeef2;
+            color: #1f2328;
         }
-        .sev-HIGH    { background: #3a1c1c; color: #ff6b6b; border: 1px solid #5a2a2a; }
-        .sev-MEDIUM  { background: #2e2a1a; color: #ffc75f; border: 1px solid #5a4a1a; }
-        .sev-LOW     { background: #1a2e1a; color: #6bcb77; border: 1px solid #2a5a2a; }
-        .sev-PENDING { background: #252839; color: #7a8499; border: 1px solid #3a3f52; }
+        .badge-cat.HARASSMENT    { background: #ffd8e4; color: #82071e; }
+        .badge-cat.THREAT        { background: #ffebe9; color: #82071e; }
+        .badge-cat.DATA_EXPOSURE { background: #ddf4ff; color: #0550ae; }
+        .badge-cat.SPAM          { background: #fff8c5; color: #6e5101; }
+        .badge-cat.NORMAL        { background: #dafbe1; color: #116329; }
+        .badge-cat.PENDING       { background: #eaeef2; color: #57606a; }
 
-        /* Category badge */
-        .badge-category {
+        .badge-sev {
             display: inline-block;
-            padding: 4px 14px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 3px 10px;
             border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 700;
+            border: 1px solid #d0d7de;
+            color: #57606a;
         }
-        .cat-HARASSMENT   { background: #3a1c2e; color: #ff8fab; }
-        .cat-THREAT       { background: #3a1c1c; color: #ff6b6b; }
-        .cat-DATA_EXPOSURE{ background: #1c1c3a; color: #74b9ff; }
-        .cat-SPAM         { background: #2e2a1a; color: #ffc75f; }
-        .cat-NORMAL       { background: #1a2e1a; color: #6bcb77; }
-        .cat-PENDING      { background: #252839; color: #7a8499; }
+        .badge-sev.HIGH   { border-color: #ffb8b8; color: #82071e; background: #fff5f5; }
+        .badge-sev.MEDIUM { border-color: #e3b341; color: #6e5101; background: #fffbdd; }
+        .badge-sev.LOW    { border-color: #aceebb; color: #116329; background: #dafbe1; }
 
-        /* Confidence bar */
-        .confidence-bar {
-            height: 8px;
-            border-radius: 4px;
-            background: #252839;
-            overflow: hidden;
-        }
-        .confidence-fill {
-            height: 100%;
-            border-radius: 4px;
-            background: #3b82f6;
-            transition: width 0.8s ease;
-        }
+        /* ── Confidence bar ── */
+        .conf-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; color: #57606a; margin-bottom: 6px; }
+        .conf-val { font-weight: 600; color: #1f2328; }
+        .conf-track { height: 6px; background: #eaeef2; border-radius: 3px; overflow: hidden; }
+        .conf-fill  { height: 100%; background: #1a7f64; border-radius: 3px; transition: width 0.8s ease; width: 0; }
 
-        /* Regulation reference box */
+        /* ── Text boxes ── */
+        .text-box {
+            background: #f6f8fa;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            padding: 12px 14px;
+            font-size: 0.875rem;
+            color: #1f2328;
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.7;
+        }
         .reg-box {
-            background: #12192e;
-            border: 1px solid #1e2d4a;
-            border-radius: 8px;
-            padding: 12px 16px;
+            background: #ddf4ff;
+            border: 1px solid #80ccff;
+            border-radius: 6px;
+            padding: 12px 14px;
             font-size: 0.875rem;
-            color: #93c5fd;
+            color: #0550ae;
             white-space: pre-wrap;
             word-break: break-word;
+            line-height: 1.7;
         }
+        .reg-source { font-size: 0.78rem; color: #57606a; margin-top: 8px; }
 
-        /* Reason box */
-        .reason-box {
-            background: #252839;
+        /* ── Evidence meta ── */
+        .meta-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+        .meta-table td { padding: 8px 0; border-bottom: 1px solid #eaeef2; vertical-align: top; }
+        .meta-table tr:last-child td { border-bottom: none; }
+        .meta-key { color: #57606a; width: 38%; }
+        .meta-val { color: #1f2328; word-break: break-all; }
+
+        /* ── Actions ── */
+        .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+        .btn-pdf {
+            background: #1a7f64;
+            color: #fff;
+            text-decoration: none;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 7px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-pdf:hover { background: #156b54; }
+        .btn-pdf.disabled { background: #94d3c2; pointer-events: none; }
+        .btn-outline {
+            background: #fff;
+            color: #1f2328;
+            text-decoration: none;
+            border: 1px solid #d0d7de;
+            padding: 9px 18px;
+            border-radius: 7px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .btn-outline:hover { background: #f6f8fa; }
+
+        /* ── Disclaimer ── */
+        .disclaimer {
+            font-size: 0.8rem;
+            color: #57606a;
+            background: #fffbdd;
+            border: 1px solid #e3b341;
             border-radius: 8px;
             padding: 12px 16px;
-            font-size: 0.875rem;
-            color: #c9d1d9;
-            white-space: pre-wrap;
-            word-break: break-word;
         }
+        .disclaimer strong { color: #1f2328; }
 
-        /* Evidence meta */
-        .meta-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #2a2d3e;
-            font-size: 0.85rem;
-        }
-        .meta-row:last-child { border-bottom: none; }
-        .meta-key { color: #7a8499; }
-        .meta-val { color: #c9d1d9; font-family: monospace; }
-
-        /* Skeleton loader */
+        /* ── Skeleton ── */
         .skeleton {
-            background: linear-gradient(90deg, #252839 25%, #2e3248 50%, #252839 75%);
+            background: linear-gradient(90deg, #eaeef2 25%, #f3f5f7 50%, #eaeef2 75%);
             background-size: 200% 100%;
             animation: shimmer 1.4s infinite;
-            border-radius: 6px;
+            border-radius: 5px;
         }
         @keyframes shimmer {
             0%   { background-position: 200% 0; }
             100% { background-position: -200% 0; }
         }
 
-        #loadingState  { display: block; }
-        #resultState   { display: none; }
-        #errorState    { display: none; }
+        /* ── States ── */
+        #loadingState { display: block; }
+        #resultState  { display: none; }
+        #errorState   { display: none; }
+
+        .error-card { text-align: center; padding: 40px 24px; }
+        .error-title { font-weight: 700; color: #82071e; margin-bottom: 8px; }
+        .error-sub   { font-size: 0.875rem; color: #57606a; margin-bottom: 20px; }
     </style>
 </head>
-<body class="text-light">
+<body>
 
-<nav class="navbar navbar-dark px-4 py-3" style="background:#0f1117; border-bottom:1px solid #2a2d3e;">
-    <span class="brand fs-5">Bukti<span>Tagih</span> AI</span>
-    <a href="upload.html" class="btn btn-sm btn-outline-secondary">← Upload Baru</a>
+<nav>
+    <span class="brand">Bukti<span>Tagih</span></span>
+    <a href="upload.html" class="btn-back">← Upload Baru</a>
 </nav>
 
-<div class="container py-5" style="max-width:720px;">
+<div class="page">
 
-    <div class="mb-4">
-        <h1 class="h4 fw-bold mb-1">Hasil Analisis Bukti</h1>
-        <p class="text-muted small mb-0" id="subHeading">Memuat data analisis…</p>
+    <div class="page-header">
+        <h1>Hasil Analisis Bukti</h1>
+        <p class="sub" id="subHeading">Memuat data analisis…</p>
     </div>
 
-    <!-- ── Loading Skeleton ──────────────────────────────────────────────── -->
+    <!-- Loading -->
     <div id="loadingState">
-        <div class="result-card p-4 mb-3">
-            <div class="skeleton mb-3" style="height:20px; width:40%;"></div>
-            <div class="skeleton mb-2" style="height:14px; width:100%;"></div>
-            <div class="skeleton mb-2" style="height:14px; width:80%;"></div>
-            <div class="skeleton" style="height:14px; width:60%;"></div>
+        <div class="card">
+            <div class="skeleton" style="height:16px; width:35%; margin-bottom:16px;"></div>
+            <div class="skeleton" style="height:40px; border-radius:8px; margin-bottom:20px;"></div>
+            <div class="skeleton" style="height:6px; margin-bottom:20px;"></div>
+            <div class="skeleton" style="height:16px; width:25%; margin-bottom:10px;"></div>
+            <div class="skeleton" style="height:80px;"></div>
         </div>
-        <div class="result-card p-4">
-            <div class="skeleton mb-3" style="height:20px; width:30%;"></div>
-            <div class="skeleton mb-2" style="height:14px; width:100%;"></div>
-            <div class="skeleton" style="height:14px; width:70%;"></div>
+        <div class="card">
+            <div class="skeleton" style="height:16px; width:30%; margin-bottom:12px;"></div>
+            <div class="skeleton" style="height:60px;"></div>
         </div>
     </div>
 
-    <!-- ── Error State ───────────────────────────────────────────────────── -->
-    <div id="errorState" class="result-card p-4">
-        <div class="fw-semibold mb-2 text-danger">❌ Gagal memuat hasil analisis</div>
-        <div class="small text-muted mb-3" id="errorMsg"></div>
-        <a href="upload.html" class="btn btn-outline-light btn-sm">← Kembali ke Upload</a>
+    <!-- Error -->
+    <div id="errorState" class="card error-card">
+        <div class="error-title">Gagal memuat hasil analisis</div>
+        <div class="error-sub" id="errorMsg"></div>
+        <a href="upload.html" class="btn-outline">← Kembali ke Upload</a>
     </div>
 
-    <!-- ── Result State ──────────────────────────────────────────────────── -->
+    <!-- Result -->
     <div id="resultState">
 
-        <!-- Verdict Card -->
-        <div class="result-card p-4 mb-3">
-            <div class="section-label">Hasil Klasifikasi AI</div>
+        <!-- Verdict -->
+        <div class="card">
+            <div class="section-label">Hasil Klasifikasi</div>
 
-            <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
-                <span id="categoryBadge" class="badge-category cat-PENDING">—</span>
-                <span id="severityBadge" class="badge-severity sev-PENDING">—</span>
-            </div>
-
-            <!-- Confidence -->
-            <div class="mb-4">
-                <div class="d-flex justify-content-between small mb-1">
-                    <span class="text-muted">Tingkat Keyakinan AI</span>
-                    <span id="confidencePct" class="fw-semibold">—</span>
-                </div>
-                <div class="confidence-bar">
-                    <div class="confidence-fill" id="confidenceFill" style="width:0%;"></div>
+            <div class="verdict-banner pending" id="verdictBanner">
+                <div class="verdict-row">
+                    <span class="badge-cat PENDING" id="categoryBadge">—</span>
+                    <span class="badge-sev" id="severityBadge">—</span>
                 </div>
             </div>
 
-            <!-- Reason -->
-            <div>
-                <div class="section-label">Alasan Analisis</div>
-                <div class="reason-box" id="reasonBox">—</div>
+            <div style="margin-bottom: 20px;">
+                <div class="conf-row">
+                    <span>Tingkat keyakinan analisis</span>
+                    <span class="conf-val" id="confidencePct">—</span>
+                </div>
+                <div class="conf-track">
+                    <div class="conf-fill" id="confidenceFill"></div>
+                </div>
             </div>
+
+            <div class="section-label">Alasan Analisis</div>
+            <div class="text-box" id="reasonBox">—</div>
         </div>
 
-        <!-- Regulation Reference Card -->
-        <div class="result-card p-4 mb-3">
+        <!-- Regulasi -->
+        <div class="card">
             <div class="section-label">Referensi Regulasi</div>
-            <div class="reg-box" id="regulationBox">—</div>
-            <div class="mt-2 small text-muted">
-                Sumber: POJK, AFPI, UU PDP — diambil dari knowledge base regulasi BuktiTagih AI
-            </div>
+            <div class="reg-box" id="regulationBox">Referensi regulasi belum tersedia.</div>
+            <div class="reg-source">Sumber: POJK, AFPI, UU PDP — knowledge base BuktiTagih</div>
         </div>
 
-        <!-- Evidence Meta Card -->
-        <div class="result-card p-4 mb-4" id="evidenceMetaCard">
+        <!-- Evidence meta -->
+        <div class="card" id="evidenceCard">
             <div class="section-label">Informasi Bukti</div>
-            <div id="evidenceMetaBody">
-                <!-- diisi oleh JS -->
-            </div>
+            <table class="meta-table" id="metaTable"></table>
         </div>
 
         <!-- Actions -->
-        <div class="d-flex gap-2 flex-wrap">
-            <a id="downloadBtn" href="#" class="btn btn-primary fw-semibold">
-                ⬇ Download Laporan PDF
-            </a>
-            <a href="bob.html" id="bobBtn" class="btn btn-outline-info fw-semibold">
-                💬 Diskusi dengan Bob
-            </a>
-            <a href="upload.html" class="btn btn-outline-secondary">
-                ← Upload Bukti Lain
-            </a>
+        <div class="actions">
+            <a id="downloadBtn" href="#" class="btn-pdf">Download Laporan PDF</a>
+            <a id="bobBtn" href="bob.html" class="btn-outline">Diskusi dengan Bob</a>
+            <a href="upload.html" class="btn-outline">Upload Bukti Lain</a>
         </div>
 
-        <!-- Disclaimer -->
-        <div class="mt-4 p-3 rounded small text-muted" style="background:#1c1f2e; border:1px solid #2a2d3e;">
-            <strong class="text-light">Perhatian:</strong>
-            Hasil analisis ini dihasilkan oleh sistem AI dan <em>bukan merupakan nasihat hukum</em>.
-            Gunakan laporan ini sebagai bahan pendukung pengaduan ke OJK, AFPI, atau lembaga bantuan hukum.
+        <div class="disclaimer">
+            <strong>Perhatian:</strong> Hasil analisis ini dihasilkan oleh sistem AI dan
+            <em>bukan merupakan nasihat hukum</em>. Gunakan laporan ini sebagai bahan
+            pendukung pengaduan ke OJK, AFPI, atau lembaga bantuan hukum.
         </div>
 
     </div>
@@ -230,125 +300,111 @@
 </div>
 
 <script>
-// ─── Konfigurasi ───────────────────────────────────────────────────────────
 const API_BASE = 'http://127.0.0.1:8000/api';
 
-// ─── Baca query params ─────────────────────────────────────────────────────
 const params     = new URLSearchParams(window.location.search);
 const analysisId = params.get('analysis_id');
 const evidenceId = params.get('evidence_id');
 
-// ─── Label Maps ───────────────────────────────────────────────────────────
 const CATEGORY_LABEL = {
-    HARASSMENT:    'Intimidasi / Harassment',
-    THREAT:        'Ancaman / Threat',
-    DATA_EXPOSURE: 'Kebocoran Data / Data Exposure',
-    SPAM:          'Spam Berlebihan',
+    HARASSMENT:    'Intimidasi',
+    THREAT:        'Ancaman',
+    DATA_EXPOSURE: 'Kebocoran Data',
+    SPAM:          'Spam',
     NORMAL:        'Normal',
     PENDING:       'Menunggu Proses AI',
 };
-
 const SEVERITY_LABEL = {
-    HIGH:    '🔴 Tinggi',
-    MEDIUM:  '🟡 Sedang',
-    LOW:     '🟢 Rendah',
-    PENDING: '⏳ Pending',
+    HIGH:    'Tinggi',
+    MEDIUM:  'Sedang',
+    LOW:     'Rendah',
+    PENDING: 'Pending',
 };
+const SEVERITY_CLASS = { HIGH: 'high', MEDIUM: 'medium', LOW: 'low', PENDING: 'pending' };
 
-// ─── DOM refs ─────────────────────────────────────────────────────────────
-const loadingState    = document.getElementById('loadingState');
-const resultState     = document.getElementById('resultState');
-const errorState      = document.getElementById('errorState');
-const errorMsg        = document.getElementById('errorMsg');
-const subHeading      = document.getElementById('subHeading');
-
-const categoryBadge   = document.getElementById('categoryBadge');
-const severityBadge   = document.getElementById('severityBadge');
-const confidencePct   = document.getElementById('confidencePct');
-const confidenceFill  = document.getElementById('confidenceFill');
-const reasonBox       = document.getElementById('reasonBox');
-const regulationBox   = document.getElementById('regulationBox');
-const evidenceMetaBody = document.getElementById('evidenceMetaBody');
-const downloadBtn     = document.getElementById('downloadBtn');
-const bobBtn          = document.getElementById('bobBtn');
-
-// ─── Show/hide helpers ─────────────────────────────────────────────────────
-function showResult()  { loadingState.style.display='none'; resultState.style.display='block'; }
-function showError(m)  { loadingState.style.display='none'; errorState.style.display='block'; errorMsg.textContent=m; }
-
-// ─── Render helpers ────────────────────────────────────────────────────────
-function renderCategory(cat) {
-    const c = (cat || 'PENDING').toUpperCase();
-    categoryBadge.textContent = CATEGORY_LABEL[c] || c;
-    categoryBadge.className = `badge-category cat-${c}`;
+function showResult() {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('resultState').style.display  = 'block';
+}
+function showError(m) {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('errorState').style.display   = 'block';
+    document.getElementById('errorMsg').textContent = m;
 }
 
-function renderSeverity(sev) {
-    const s = (sev || 'PENDING').toUpperCase();
-    severityBadge.textContent = SEVERITY_LABEL[s] || s;
-    severityBadge.className = `badge-severity sev-${s}`;
-}
-
-function renderConfidence(conf) {
-    const pct = conf ? Math.round(parseFloat(conf) * 100) : 0;
-    confidencePct.textContent = pct + '%';
-    // Render setelah sedikit delay agar animasi terlihat
-    setTimeout(() => { confidenceFill.style.width = pct + '%'; }, 100);
-}
-
-function renderEvidence(ev) {
-    if (!ev) return;
-    const rows = [
-        { key: 'Evidence ID', val: ev.evidence_id ?? '—' },
-        { key: 'Nama File',   val: ev.file_name   ?? '—' },
-        { key: 'Tipe File',   val: ev.file_type   ?? '—' },
-        { key: 'Waktu Upload',val: ev.upload_time ?? '—' },
-    ];
-    evidenceMetaBody.innerHTML = rows.map(r =>
-        `<div class="meta-row"><span class="meta-key">${r.key}</span><span class="meta-val">${r.val}</span></div>`
-    ).join('');
-}
-
-// ─── Fetch Analysis ────────────────────────────────────────────────────────
 async function loadAnalysis() {
-    if (!analysisId) {
-        showError('Parameter analysis_id tidak ditemukan di URL. Kembali ke halaman upload.');
+    if (!analysisId && !evidenceId) {
+        showError('Parameter tidak ditemukan di URL. Kembali ke halaman upload.');
         return;
     }
 
     try {
-        const res  = await fetch(`${API_BASE}/analysis/${analysisId}`, {
-            headers: { 'Accept': 'application/json' }
-        });
+        // Pakai analysis_id langsung jika ada; fallback ke endpoint by-evidence
+        const url = analysisId
+            ? `${API_BASE}/analysis/${analysisId}`
+            : `${API_BASE}/analysis/by-evidence/${evidenceId}`;
+
+        const res  = await fetch(url, { headers: { 'Accept': 'application/json' } });
         const data = await res.json();
+        if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
 
-        if (!res.ok) {
-            throw new Error(data.message || `HTTP ${res.status}`);
-        }
+        // Sub heading
+        document.getElementById('subHeading').textContent =
+            `Evidence #${evidenceId || data.evidence?.evidence_id || '—'}` +
+            (analysisId ? `  ·  Analysis #${analysisId}` : '');
 
-        // Render semua bagian
-        subHeading.textContent = `Analysis ID: ${analysisId}  ·  Evidence ID: ${evidenceId || data.evidence?.evidence_id || '—'}`;
+        // Verdict banner
+        const cat = (data.category || 'PENDING').toUpperCase();
+        const sev = (data.severity || 'PENDING').toUpperCase();
+        const banner = document.getElementById('verdictBanner');
+        banner.className = `verdict-banner ${SEVERITY_CLASS[sev] || 'pending'}`;
 
-        renderCategory(data.category);
-        renderSeverity(data.severity);
-        renderConfidence(data.confidence);
+        const catBadge = document.getElementById('categoryBadge');
+        catBadge.textContent = CATEGORY_LABEL[cat] || cat;
+        catBadge.className = `badge-cat ${cat}`;
 
-        reasonBox.textContent     = data.reason     || 'Menunggu proses AI pipeline…';
-        regulationBox.textContent = data.regulation_reference || 'Referensi regulasi belum tersedia.';
+        const sevBadge = document.getElementById('severityBadge');
+        sevBadge.textContent = SEVERITY_LABEL[sev] || sev;
+        sevBadge.className = `badge-sev ${sev}`;
 
-        renderEvidence(data.evidence);
+        // Confidence — skala 0–100, langsung tampilkan
+        const conf = data.confidence ? Math.round(parseFloat(data.confidence)) : 0;
+        document.getElementById('confidencePct').textContent = conf + '%';
+        setTimeout(() => { document.getElementById('confidenceFill').style.width = conf + '%'; }, 100);
 
-        // Download PDF button
-        const eid = evidenceId || data.evidence?.evidence_id;
-        if (eid) {
-            downloadBtn.href = `${API_BASE}/report/${eid}`;
-            downloadBtn.setAttribute('download', `BuktiTagih_Laporan_${eid}.pdf`);
+        // Reason & regulation
+        document.getElementById('reasonBox').textContent =
+            data.reason || 'Menunggu proses AI pipeline…';
+        document.getElementById('regulationBox').textContent =
+            data.regulation_reference || 'Referensi regulasi belum tersedia.';
+
+        // Evidence meta
+        const ev = data.evidence;
+        if (ev) {
+            const rows = [
+                ['Evidence ID', `#${ev.evidence_id}`],
+                ['Nama File',   ev.file_name  || '—'],
+                ['Tipe File',   ev.file_type  || '—'],
+                ['Waktu Upload',ev.upload_time || '—'],
+            ];
+            document.getElementById('metaTable').innerHTML = rows.map(([k, v]) =>
+                `<tr><td class="meta-key">${k}</td><td class="meta-val">${v}</td></tr>`
+            ).join('');
         } else {
-            downloadBtn.classList.add('disabled');
+            document.getElementById('evidenceCard').style.display = 'none';
         }
 
-        // Bob button — bawa analysis_id sebagai context
-        bobBtn.href = `bob.html?analysis_id=${analysisId}`;
+        // Buttons
+        const eid = evidenceId || ev?.evidence_id;
+        const dlBtn = document.getElementById('downloadBtn');
+        if (eid) {
+            dlBtn.href = `${API_BASE}/report/${eid}`;
+            dlBtn.setAttribute('download', `BuktiTagih_Laporan_${eid}.pdf`);
+        } else {
+            dlBtn.classList.add('disabled');
+        }
+        document.getElementById('bobBtn').href =
+            `bob.html?analysis_id=${analysisId || ''}`;
 
         showResult();
 
@@ -357,10 +413,7 @@ async function loadAnalysis() {
     }
 }
 
-// ─── Init ──────────────────────────────────────────────────────────────────
 loadAnalysis();
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

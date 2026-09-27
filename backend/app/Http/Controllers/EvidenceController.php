@@ -42,19 +42,19 @@ class EvidenceController extends Controller
         $aiService = new AiAnalysisService();
         $aiResult  = $aiService->analyzeDocument($evidenceId, $file->getRealPath());
 
-        // Jika Langflow mengembalikan hasil sukses, simpan ke tabel ai_analysis
-        if (($aiResult['status'] ?? '') === 'success') {
-            DB::table('ai_analysis')->insert([
-                'evidence_id'          => $evidenceId,
-                'category'             => $aiResult['category']             ?? 'PENDING',
-                'severity'             => $aiResult['severity']             ?? 'PENDING',
-                'reason'               => $aiResult['reason']               ?? null,
-                'confidence'           => $aiResult['confidence']           ?? 0,
-                'regulation_reference' => $aiResult['regulation_reference'] ?? null,
-                'created_at'           => now(),
-                'updated_at'           => now(),
-            ]);
-        }
+        $aiSuccess = ($aiResult['status'] ?? '') === 'success';
+
+        // Selalu buat row ai_analysis — isi hasil AI kalau sukses, PENDING kalau belum/gagal
+        DB::table('ai_analysis')->insert([
+            'evidence_id'          => $evidenceId,
+            'category'             => $aiSuccess ? ($aiResult['category']             ?? 'PENDING') : 'PENDING',
+            'severity'             => $aiSuccess ? ($aiResult['severity']             ?? 'PENDING') : 'PENDING',
+            'reason'               => $aiSuccess ? ($aiResult['reason']               ?? null)      : 'Menunggu proses AI pipeline...',
+            'confidence'           => $aiSuccess ? ($aiResult['confidence']           ?? 0)         : 0,
+            'regulation_reference' => $aiSuccess ? ($aiResult['regulation_reference'] ?? null)      : null,
+            'created_at'           => now(),
+            'updated_at'           => now(),
+        ]);
 
         return response()->json([
             'evidence_id'   => $evidenceId,
