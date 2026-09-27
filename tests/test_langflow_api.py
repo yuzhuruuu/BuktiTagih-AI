@@ -8,7 +8,7 @@ import uuid
 
 api_key = 'sk-txqdRQ0QsbFGXq-m15Pj_9_qppZpgb6FoCUDcadDDw0'
 flow_id = "e05721f1-c3a2-4a33-bbd2-d30dee3df995"
-img_path = r"D:\HBB\BuktiTagih-AI\screenshots\testeks1.jpg"   # ganti sesuai lokasi gambar di laptopmu
+img_path = r"D:\HBB\BuktiTagih-AI\screenshotstes\testeks1.jpg"   # ganti sesuai lokasi gambar di laptopmu
 
 headers = {"x-api-key": api_key}
 
