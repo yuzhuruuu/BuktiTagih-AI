@@ -100,15 +100,24 @@ Master reference document awalnya mengasumsikan **IBM Granite** sebagai reasonin
 - Fix kalkulasi `confidence_pct` di PDF report (skala 0–100, bukan 0–1).
 - Variabel `.env` baru: `LANGFLOW_FLOW_ID`, `LANGFLOW_CHAT_INPUT_ID` (nilai: `ChatInput-aPEX5`).
 - Migration baru: kolom `confidence` diubah dari `decimal(5,4)` → `decimal(5,2)`.
-- **Menunggu:** Person A kirim contoh respons JSON asli dari endpoint `/run` untuk verifikasi parsing.
+- `input_value: 'Analisis bukti terlampir.'` ditambahkan ke body run flow (fix — sebelumnya tidak dikirim).
+- `EvidenceController` diperbarui: entities dari AI sekarang disimpan ke tabel `extracted_entity`.
+- Tabel `sessions` dibuat via `php artisan session:table && migrate` (fix error `no such table: sessions`).
+- **Hasil test Postman:** upload file sukses, `ai_process` berisi `status: error, message: Upload file ke Langflow gagal` — kode sudah sampai ke Langflow, gagal karena `127.0.0.1:7860` Person A tidak reachable dari laptop Person B. Ini expected (lihat Catatan Teknis baris 166).
 
 ---
 
 ## Status: SEDANG BERJALAN
 
-**Uji API Langflow — Person A** `[SEDANG BERJALAN]`
-- Person A sedang menyiapkan uji endpoint file upload + run via API (bukan Playground).
-- Setelah selesai, Person A akan kirim: contoh raw respons JSON dari `/run` ke Person B untuk verifikasi parsing di `parseRunResponse()`.
+**Install Langflow lokal di laptop Person B** `[SEDANG BERJALAN]`
+- Person B perlu install Langflow sendiri (`pip install langflow && langflow run`), import `langflow/evidence_analysis_flow.json`, dan buat API key baru.
+- Setelah itu end-to-end test dari `POST /api/evidence/upload` akan menggunakan Langflow lokal Person B.
+- Alternatif: Person A jalankan `ngrok http 7860` dan kirim URL ngrok ke Person B.
+
+**Uji API Langflow — Person A** `[SELESAI]`
+- Person A sudah uji endpoint file upload + run via API — berhasil.
+- Flow ID dikonfirmasi: `e05721f1-c3a2-4a33-bbd2-d30dee3df995`, Chat Input ID: `ChatInput-aPEX5`.
+- Test case 20/20 recall 100% sudah dicapai (Hari 8–9 selesai di sisi Person A).
 
 **Keputusan arsitektur: Opsi A vs Opsi B** `[SELESAI — Opsi B dipilih]`
 - **Opsi A (callback):** Langflow memanggil endpoint Laravel setelah selesai.
@@ -122,26 +131,19 @@ Master reference document awalnya mengasumsikan **IBM Granite** sebagai reasonin
 
 ## Status: BELUM DIMULAI (Next Steps)
 
-**Verifikasi parsing respons Langflow** `[BELUM DIMULAI — menunggu Person A]`
-- Setelah Person A selesai uji API, kirim contoh raw JSON dari `/run` ke Person B.
-- Person B verifikasi `parseRunResponse()` di `AiAnalysisService.php` cocok dengan struktur respons asli.
-- Lalu test end-to-end: upload via `POST /api/evidence/upload` → cek tabel `ai_analysis` terisi.
+**End-to-end test setelah Langflow Person B jalan** `[BELUM DIMULAI]`
+- Setelah Langflow lokal Person B berjalan (lihat "Sedang Berjalan" di atas):
+  - Upload file via `POST /api/evidence/upload` → verifikasi response `ai_process.status === "success"`.
+  - Cek tabel `ai_analysis` terisi category/severity/reason/confidence/regulation_reference yang real.
+  - Cek tabel `extracted_entity` terisi entities yang diekstrak AI.
 
-**Hari 8 — Buat 16 test case baru** `[BELUM DIMULAI]`
-- Target minimum 20 test case (Bagian 8 dokumen master). Baru ada 4, belum ada satu pun SPAM.
-- **Pembagian yang disepakati: 8 oleh Person A (wajib include SPAM), 8 oleh Person B.**
-- Format file: `tests/evidence_cases/cases.json`
-  ```json
-  { "id": 5, "input": "...", "expected_category": "SPAM", "expected_severity": "LOW" }
-  ```
-- **Person B perlu membuat 8 test case** dengan distribusi: 2 HARASSMENT, 2 THREAT, 2 DATA_EXPOSURE, 1 NORMAL, 1 SPAM.
+**Hari 8–9 — Full testing 20 test case** `[SELESAI — sisi Person A]`
+- Person A sudah menyelesaikan 20 test case (20/20 recall 100%). File ada di `tests/evidence_cases/cases.json`.
+- **Person B belum verifikasi** hasil ini dari sisi backend (end-to-end belum jalan karena Langflow belum terkoneksi).
 
-**Hari 9 — Full testing 20 test case** `[BELUM DIMULAI]`
-- Jalankan semua 20 case, ukur recall per kategori (target ≥0,90).
-- Tuning prompt Person A jika belum tercapai. Semua test memakai model yang sama.
-
-**Hari 10 — Cek metrik lain** `[BELUM DIMULAI]`
-- F1 ekstraksi entity ≥0,90, kecepatan (100 pesan ≤3 menit; saat ini ~17 detik/pesan), kebocoran PII nol.
+**Hari 10 — Cek metrik lain** `[SEBAGIAN — Person A sudah mulai]`
+- Kecepatan: rata-rata 20–25 detik/pesan pada free tier Gemini (5 req/menit). Target "100 pesan ≤3 menit" tidak realistis di free tier — akan dilaporkan sebagai limitasi jujur.
+- F1 ekstraksi entity dan kebocoran PII: Person A akan cek di Hari 10.
 
 **Perbaikan entity prompt — Person A** `[BELUM DIMULAI]`
 - Entity `actor` dan `victim` masih terisi kata ganti ("Kami", "kamu"). Perlu instruksi agar berisi nilai konkret.
@@ -161,9 +163,11 @@ Master reference document awalnya mengasumsikan **IBM Granite** sebagai reasonin
   - Flow ID: `e05721f1-c3a2-4a33-bbd2-d30dee3df995`
   - Chat Input Component ID: `ChatInput-aPEX5`
   - Isi di `backend/.env`: `LANGFLOW_FLOW_ID` dan `LANGFLOW_CHAT_INPUT_ID`
-- **Kuota Gemini gratis:** batas 5 permintaan per menit. Person A dan Person B **wajib pakai API key dari Google project yang berbeda** agar tidak rebutan kuota saat testing bareng.
+- **Kuota Gemini gratis:** batas 5 permintaan per menit. Person A dan Person B **wajib pakai API key dari Google project yang berbeda** agar tidak rebutan kuota saat testing bareng. Kuota dibagi per project Google, bukan per API key — semua key dalam satu project berbagi kuota yang sama.
 - **API key:** jangan commit key ke repo. Sebelum commit export flow, cek: `Select-String -Path langflow\*.json -Pattern "AIza"` (PowerShell). Jika ada hasil, revoke key dan buat baru.
 - **Langflow lokal:** `127.0.0.1:7860` di laptop Person A tidak bisa dijangkau backend di laptop Person B. Person B mengimpor `langflow/evidence_analysis_flow.json` dan menjalankan Langflow sendiri untuk development. Untuk demo final, semua berjalan di satu mesin.
+- **Skala confidence:** 0–100 (dikonfirmasi Person A). Kolom DB `decimal(5,2)` sudah benar. Tidak ada konversi di service layer.
+- **Entities:** disimpan di tabel `extracted_entity` (bukan kolom di `ai_analysis`). Setiap entity = 1 baris dengan `entity_type`, `entity_value`, `confidence`.
 
 ---
 
@@ -185,4 +189,4 @@ Master reference document awalnya mengasumsikan **IBM Granite** sebagai reasonin
 
 ---
 
-*Terakhir diupdate: 25 September 2026 — sinkronisasi update Person A (Hari 6–7 beres, uji API in progress) + implementasi integrasi Langflow sisi Person B selesai.*
+*Terakhir diupdate: 28 September 2026 — sinkronisasi update Person A (Hari 8–9 selesai: 20/20 test case, recall 100%) + fix backend: `input_value`, entities ke `extracted_entity`, bug `sessions` table. Bottleneck sekarang: Langflow lokal Person B belum terinstall, end-to-end belum ditest.*

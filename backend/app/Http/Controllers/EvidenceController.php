@@ -23,8 +23,12 @@ class EvidenceController extends Controller
         // Ekstrak metadata file
         $hashFile = hash_file('sha256', $file->getRealPath());
 
-        // Simpan file fisik dan ambil path-nya
-        $filePath = $file->storeAs('public/evidence', $hashFile . '.' . $file->getClientOriginalExtension());
+        // Simpan file fisik ke public disk dengan nama hash
+        $filePath = $file->storeAs(
+            'evidence',  // directory dalam public disk
+            $hashFile . '.' . $file->getClientOriginalExtension(),
+            'public'  // explicit disk
+        );
 
         // Simpan record ke DB terlebih dahulu untuk mendapatkan evidence_id yang valid
         $evidenceId = DB::table('evidence')->insertGetId([
@@ -39,8 +43,10 @@ class EvidenceController extends Controller
         ]);
 
         // Panggil Service AI dengan evidence_id yang sudah valid
+        // File disimpan ke public disk, jadi path = storage/app/public/{$filePath}
+        $actualFilePath = storage_path('app/public/' . $filePath);
         $aiService = new AiAnalysisService();
-        $aiResult  = $aiService->analyzeDocument($evidenceId, $file->getRealPath());
+        $aiResult  = $aiService->analyzeDocument($evidenceId, $actualFilePath);
 
         $aiSuccess = ($aiResult['status'] ?? '') === 'success';
 
@@ -55,6 +61,27 @@ class EvidenceController extends Controller
             'created_at'           => now(),
             'updated_at'           => now(),
         ]);
+
+        // Simpan entities ke tabel extracted_entity jika AI sukses dan ada data entities
+        if ($aiSuccess && ! empty($aiResult['entities']) && is_array($aiResult['entities'])) {
+            $entityRows = [];
+            foreach ($aiResult['entities'] as $entity) {
+                if (empty($entity['type']) || empty($entity['value'])) {
+                    continue;
+                }
+                $entityRows[] = [
+                    'evidence_id'  => $evidenceId,
+                    'entity_type'  => $entity['type'],
+                    'entity_value' => $entity['value'],
+                    'confidence'   => $entity['confidence'] ?? null,
+                    'created_at'   => now(),
+                    'updated_at'   => now(),
+                ];
+            }
+            if (! empty($entityRows)) {
+                DB::table('extracted_entity')->insert($entityRows);
+            }
+        }
 
         return response()->json([
             'evidence_id'   => $evidenceId,

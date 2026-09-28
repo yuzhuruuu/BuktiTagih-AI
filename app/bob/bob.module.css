@@ -1,0 +1,261 @@
+.nav {
+  background: #fff;
+  border-bottom: 1px solid #d0d7de;
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #1f2328;
+  letter-spacing: -0.3px;
+}
+
+.brand span {
+  color: #1a7f64;
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navLabel {
+  font-size: 0.8rem;
+  color: #57606a;
+}
+
+.btnBack {
+  font-size: 0.82rem;
+  color: #57606a;
+  text-decoration: none;
+  border: 1px solid #d0d7de;
+  padding: 5px 12px;
+  border-radius: 6px;
+  background: #fff;
+  transition: background 0.12s, color 0.12s;
+}
+
+.btnBack:hover {
+  background: #f6f8fa;
+  color: #1f2328;
+}
+
+.contextStrip {
+  background: #ddf4ff;
+  border-bottom: 1px solid #80ccff;
+  padding: 8px 24px;
+  font-size: 0.8rem;
+  color: #0550ae;
+  flex-shrink: 0;
+}
+
+.contextStrip strong {
+  font-weight: 600;
+}
+
+.chatWrapper {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.msgRow {
+  display: flex;
+  flex-direction: column;
+}
+
+.msgRow.user {
+  align-items: flex-end;
+}
+
+.msgRow.bob {
+  align-items: flex-start;
+}
+
+.msgLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  color: #57606a;
+}
+
+.bubble {
+  max-width: 72%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.bobBubble {
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-bottom-left-radius: 3px;
+  color: #1f2328;
+}
+
+.userBubble {
+  background: #1a7f64;
+  color: #fff;
+  border-bottom-right-radius: 3px;
+}
+
+.systemBubble {
+  background: #dafbe1;
+  border: 1px solid #aceebb;
+  color: #116329;
+  font-size: 0.8rem;
+  align-self: center;
+  border-radius: 20px;
+  padding: 5px 14px;
+  max-width: 90%;
+  text-align: center;
+}
+
+.typingDots {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.typingDots span {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: #57606a;
+  border-radius: 50%;
+  animation: bounce 1.2s infinite;
+}
+
+.typingDots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typingDots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-5px);
+  }
+}
+
+.inputArea {
+  background: #fff;
+  border-top: 1px solid #d0d7de;
+  padding: 14px 16px;
+  flex-shrink: 0;
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.quickReplies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.qrBtn {
+  background: #f6f8fa;
+  border: 1px solid #d0d7de;
+  color: #1f2328;
+  border-radius: 16px;
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.qrBtn:hover {
+  background: #eaeef2;
+  border-color: #b0b7bf;
+}
+
+.inputRow {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.textarea {
+  flex: 1;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: #1f2328;
+  resize: none;
+  background: #f6f8fa;
+  line-height: 1.5;
+  transition: border-color 0.12s, background 0.12s;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: #1a7f64;
+  background: #fff;
+}
+
+.textarea::placeholder {
+  color: #8c959f;
+}
+
+.btnSend {
+  background: #1a7f64;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s;
+}
+
+.btnSend:hover:not(:disabled) {
+  background: #156b54;
+}
+
+.btnSend:disabled {
+  background: #94d3c2;
+  cursor: not-allowed;
+}
+
+.inputHint {
+  font-size: 0.72rem;
+  color: #8c959f;
+  margin-top: 6px;
+}

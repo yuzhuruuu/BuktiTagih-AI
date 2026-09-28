@@ -46,65 +46,120 @@ class AiAnalysisService
      */
     public function sendToLangflow(int $evidenceId, string $filePath): array
     {
-        // ── Langkah 1: upload file ──────────────────────────────────────────
-        $uploadEndpoint = "{$this->langflowUrl}/api/v1/files/upload/{$this->flowId}";
+        try {
+            // Verify file exists
+            if (! file_exists($filePath)) {
+                Log::error('File tidak ditemukan', [
+                    'evidence_id' => $evidenceId,
+                    'file_path'   => $filePath,
+                ]);
+                return ['status' => 'error', 'message' => 'File tidak ditemukan.'];
+            }
 
-        $uploadResponse = Http::withHeaders($this->headers())
-            ->attach('file', fopen($filePath, 'r'), basename($filePath))
-            ->post($uploadEndpoint);
+            // ── Langkah 1: upload file ──────────────────────────────────────────
+            $uploadEndpoint = "{$this->langflowUrl}/api/v1/files/upload/{$this->flowId}";
 
-        if (! $uploadResponse->successful()) {
-            Log::error('Langflow file upload gagal', [
+            Log::info('Langflow: Mulai upload file', [
                 'evidence_id' => $evidenceId,
-                'status'      => $uploadResponse->status(),
-                'body'        => $uploadResponse->body(),
+                'endpoint'    => $uploadEndpoint,
+                'file_size'   => filesize($filePath),
             ]);
-            return ['status' => 'error', 'message' => 'Upload file ke Langflow gagal.'];
-        }
 
-        $langflowFilePath = $uploadResponse->json('file_path') ?? $uploadResponse->json('flowId');
+            // Gunakan file_get_contents untuk ensure proper multipart encoding
+            $uploadResponse = Http::withHeaders($this->authHeaders())
+                ->timeout(300)  // Extended: 5 menit untuk upload file
+                ->attach('file', file_get_contents($filePath), basename($filePath))
+                ->post($uploadEndpoint);
 
-        if (empty($langflowFilePath)) {
-            Log::error('Langflow upload response tidak mengandung file_path', [
-                'evidence_id' => $evidenceId,
-                'response'    => $uploadResponse->json(),
+            if (! $uploadResponse->successful()) {
+                Log::error('Langflow file upload gagal', [
+                    'evidence_id' => $evidenceId,
+                    'status'      => $uploadResponse->status(),
+                    'body'        => $uploadResponse->body(),
+                ]);
+                return ['status' => 'error', 'message' => 'Upload file ke Langflow gagal: ' . $uploadResponse->status()];
+            }
+
+            $responseData = $uploadResponse->json();
+            Log::info('Langflow upload response', ['evidence_id' => $evidenceId, 'response' => $responseData]);
+
+            $langflowFilePath = $responseData['file_path'] ?? $responseData['flowId'] ?? null;
+
+            if (empty($langflowFilePath)) {
+                Log::error('Langflow upload response tidak mengandung file_path', [
+                    'evidence_id' => $evidenceId,
+                    'response'    => $responseData,
+                ]);
+                return ['status' => 'error', 'message' => 'Respons upload Langflow tidak valid.'];
+            }
+
+            Log::info('Langflow: Upload file berhasil', [
+                'evidence_id'      => $evidenceId,
+                'file_path'        => $langflowFilePath,
             ]);
-            return ['status' => 'error', 'message' => 'Respons upload Langflow tidak valid.'];
-        }
 
-        // ── Langkah 2: run flow ─────────────────────────────────────────────
-        $runEndpoint = "{$this->langflowUrl}/api/v1/run/{$this->flowId}";
+            // ── Langkah 2: run flow ─────────────────────────────────────────────
+            $runEndpoint = "{$this->langflowUrl}/api/v1/run/{$this->flowId}";
 
-        $runResponse = Http::withHeaders($this->headers())
-            ->post($runEndpoint, [
-                'input_type'  => 'chat',
-                'output_type' => 'chat',
-                'tweaks'      => [
-                    $this->chatInputId => [
-                        'files' => $langflowFilePath,
+            Log::info('Langflow: Mulai run flow', [
+                'evidence_id'  => $evidenceId,
+                'endpoint'     => $runEndpoint,
+                'chat_input_id' => $this->chatInputId,
+            ]);
+
+            $runResponse = Http::withHeaders($this->authHeaders())
+                ->timeout(300)  // Extended: 5 menit untuk run flow (Langflow needs 13-15 sec)
+                ->asJson()
+                ->post($runEndpoint, [
+                    'input_type'  => 'chat',
+                    'output_type' => 'chat',
+                    'input_value' => 'Analisis bukti terlampir.',
+                    'tweaks'      => [
+                        $this->chatInputId => [
+                            'files' => $langflowFilePath,
+                        ],
                     ],
-                ],
-            ]);
+                ]);
 
-        if (! $runResponse->successful()) {
-            Log::error('Langflow run flow gagal', [
+            if (! $runResponse->successful()) {
+                Log::error('Langflow run flow gagal', [
+                    'evidence_id' => $evidenceId,
+                    'status'      => $runResponse->status(),
+                    'body'        => $runResponse->body(),
+                ]);
+                return ['status' => 'error', 'message' => 'Run flow Langflow gagal: ' . $runResponse->status()];
+            }
+
+            Log::info('Langflow: Run flow berhasil', ['evidence_id' => $evidenceId]);
+
+            return $this->parseRunResponse($runResponse->json());
+
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            Log::error('Langflow connection timeout', [
+                'evidence_id'   => $evidenceId,
+                'error'         => $e->getMessage(),
+                'langflow_url'  => $this->langflowUrl,
+            ]);
+            return ['status' => 'error', 'message' => 'Koneksi Langflow timeout. Cek apakah Langflow running dan flow ID benar.'];
+
+        } catch (\Exception $e) {
+            Log::error('Langflow error', [
                 'evidence_id' => $evidenceId,
-                'status'      => $runResponse->status(),
-                'body'        => $runResponse->body(),
+                'error'       => $e->getMessage(),
+                'trace'       => $e->getTraceAsString(),
             ]);
-            return ['status' => 'error', 'message' => 'Run flow Langflow gagal.'];
+            return ['status' => 'error', 'message' => 'Error Langflow: ' . $e->getMessage()];
         }
-
-        return $this->parseRunResponse($runResponse->json());
     }
 
     /**
      * Ekstrak field yang dibutuhkan dari respons JSON Langflow /run.
-     * Langflow membungkus output di outputs[0].outputs[0].results.message.text
+     * Langflow membungkus output di outputs[0].outputs[0].results.message.data.text
      */
     private function parseRunResponse(array $response): array
     {
-        $raw = $response['outputs'][0]['outputs'][0]['results']['message']['text'] ?? null;
+        // Path yang benar: results.message.data.text (bukan hanya results.message.text)
+        $raw = $response['outputs'][0]['outputs'][0]['results']['message']['data']['text'] ?? null;
 
         if (empty($raw)) {
             Log::warning('Langflow run response tidak mengandung output teks', ['response' => $response]);
@@ -136,9 +191,13 @@ class AiAnalysisService
         ];
     }
 
-    private function headers(): array
+    /**
+     * Header autentikasi saja — Content-Type tidak di-set di sini
+     * agar tidak menimpa multipart/form-data boundary saat upload file.
+     */
+    private function authHeaders(): array
     {
-        $headers = ['Content-Type' => 'application/json'];
+        $headers = [];
 
         if (! empty($this->apiKey)) {
             $headers['x-api-key'] = $this->apiKey;

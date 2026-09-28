@@ -22,4 +22,9 @@ class Evidence extends Model
     {
         return $this->hasMany(AiAnalysis::class, 'evidence_id', 'evidence_id');
     }
+
+    public function extractedEntities()
+    {
+        return $this->hasMany(ExtractedEntity::class, 'evidence_id', 'evidence_id');
+    }
 }

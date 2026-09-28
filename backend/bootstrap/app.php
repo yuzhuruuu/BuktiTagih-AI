@@ -12,9 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Pastikan semua request ke /api/* selalu dapat JSON error, bukan HTML
-        $middleware->api(prepend: [
-            \Illuminate\Http\Middleware\HandleCors::class,
+        // Register named middleware
+        $middleware->alias([
+            'cors' => \App\Http\Middleware\CorsMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
