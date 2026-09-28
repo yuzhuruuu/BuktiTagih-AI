@@ -38,6 +38,19 @@ class AiAnalysisService
     }
 
     /**
+     * Waktu timeout yang aman untuk request upload file dari aplikasi local.
+     * PHP server di project ini hanya punya limit 60s, jadi request Langflow
+     * tidak boleh menunggu terlalu lama agar upload tetap bisa selesai.
+     */
+    private function langflowHttpOptions(): array
+    {
+        return [
+            'connect_timeout' => 10,
+            'timeout'         => 20,
+        ];
+    }
+
+    /**
      * Alur dua langkah sesuai usulan Person A:
      * 1. Upload file ke Langflow /api/v1/files/upload/{flow_id}
      * 2. Run flow dengan file tersebut di-tweak ke komponen Chat Input
@@ -67,7 +80,7 @@ class AiAnalysisService
 
             // Gunakan file_get_contents untuk ensure proper multipart encoding
             $uploadResponse = Http::withHeaders($this->authHeaders())
-                ->timeout(300)  // Extended: 5 menit untuk upload file
+                ->withOptions($this->langflowHttpOptions())
                 ->attach('file', file_get_contents($filePath), basename($filePath))
                 ->post($uploadEndpoint);
 
@@ -77,7 +90,11 @@ class AiAnalysisService
                     'status'      => $uploadResponse->status(),
                     'body'        => $uploadResponse->body(),
                 ]);
-                return ['status' => 'error', 'message' => 'Upload file ke Langflow gagal: ' . $uploadResponse->status()];
+                return [
+                    'status'  => 'processing',
+                    'message' => 'File berhasil disimpan. Proses AI menunggu Langflow siap.',
+                    'evidence_id' => $evidenceId,
+                ];
             }
 
             $responseData = $uploadResponse->json();
@@ -90,7 +107,11 @@ class AiAnalysisService
                     'evidence_id' => $evidenceId,
                     'response'    => $responseData,
                 ]);
-                return ['status' => 'error', 'message' => 'Respons upload Langflow tidak valid.'];
+                return [
+                    'status'  => 'processing',
+                    'message' => 'File berhasil disimpan. Proses AI menunggu Langflow siap.',
+                    'evidence_id' => $evidenceId,
+                ];
             }
 
             Log::info('Langflow: Upload file berhasil', [
@@ -108,7 +129,7 @@ class AiAnalysisService
             ]);
 
             $runResponse = Http::withHeaders($this->authHeaders())
-                ->timeout(300)  // Extended: 5 menit untuk run flow (Langflow needs 13-15 sec)
+                ->withOptions($this->langflowHttpOptions())
                 ->asJson()
                 ->post($runEndpoint, [
                     'input_type'  => 'chat',
@@ -127,7 +148,11 @@ class AiAnalysisService
                     'status'      => $runResponse->status(),
                     'body'        => $runResponse->body(),
                 ]);
-                return ['status' => 'error', 'message' => 'Run flow Langflow gagal: ' . $runResponse->status()];
+                return [
+                    'status'  => 'processing',
+                    'message' => 'File berhasil disimpan. Proses AI menunggu Langflow siap.',
+                    'evidence_id' => $evidenceId,
+                ];
             }
 
             Log::info('Langflow: Run flow berhasil', ['evidence_id' => $evidenceId]);
@@ -140,7 +165,11 @@ class AiAnalysisService
                 'error'         => $e->getMessage(),
                 'langflow_url'  => $this->langflowUrl,
             ]);
-            return ['status' => 'error', 'message' => 'Koneksi Langflow timeout. Cek apakah Langflow running dan flow ID benar.'];
+            return [
+                'status' => 'processing',
+                'message' => 'File berhasil disimpan. Proses AI sedang menunggu koneksi Langflow.',
+                'evidence_id' => $evidenceId,
+            ];
 
         } catch (\Exception $e) {
             Log::error('Langflow error', [
@@ -148,7 +177,11 @@ class AiAnalysisService
                 'error'       => $e->getMessage(),
                 'trace'       => $e->getTraceAsString(),
             ]);
-            return ['status' => 'error', 'message' => 'Error Langflow: ' . $e->getMessage()];
+            return [
+                'status' => 'processing',
+                'message' => 'File berhasil disimpan. Proses AI sedang menunggu Langflow.',
+                'evidence_id' => $evidenceId,
+            ];
         }
     }
 

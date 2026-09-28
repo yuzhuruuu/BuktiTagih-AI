@@ -1,8 +1,11 @@
 .nav {
-  background: #fff;
-  border-bottom: 1px solid #d0d7de;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(88, 126, 255, 0.18);
+  box-shadow: 0 1px 0 rgba(18, 47, 103, 0.04);
   padding: 0 24px;
-  height: 56px;
+  height: 62px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -10,14 +13,14 @@
 }
 
 .brand {
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: #1f2328;
-  letter-spacing: -0.3px;
+  font-weight: 800;
+  font-size: 1.08rem;
+  color: #11213d;
+  letter-spacing: -0.04em;
 }
 
 .brand span {
-  color: #1a7f64;
+  color: #2563eb;
 }
 
 .navRight {
@@ -28,36 +31,36 @@
 
 .navLabel {
   font-size: 0.8rem;
-  color: #57606a;
+  color: #59709a;
 }
 
 .btnBack {
-  font-size: 0.82rem;
-  color: #57606a;
+  font-size: 0.8rem;
+  color: #59709a;
   text-decoration: none;
-  border: 1px solid #d0d7de;
-  padding: 5px 12px;
-  border-radius: 6px;
-  background: #fff;
-  transition: background 0.12s, color 0.12s;
+  border: 1px solid rgba(88, 126, 255, 0.18);
+  padding: 7px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.72);
+  transition: 0.15s ease;
 }
 
 .btnBack:hover {
-  background: #f6f8fa;
-  color: #1f2328;
+  background: rgba(219, 234, 254, 0.7);
+  color: #11213d;
 }
 
 .contextStrip {
-  background: #ddf4ff;
-  border-bottom: 1px solid #80ccff;
+  background: rgba(219, 234, 254, 0.8);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
   padding: 8px 24px;
   font-size: 0.8rem;
-  color: #0550ae;
+  color: #1d4ed8;
   flex-shrink: 0;
 }
 
 .contextStrip strong {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .chatWrapper {
@@ -97,41 +100,43 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin-bottom: 4px;
-  color: #57606a;
+  margin-bottom: 5px;
+  color: #59709a;
 }
 
 .bubble {
   max-width: 72%;
-  padding: 10px 14px;
-  border-radius: 10px;
+  padding: 12px 14px;
+  border-radius: 16px;
   font-size: 0.9rem;
-  line-height: 1.65;
+  line-height: 1.7;
   white-space: pre-wrap;
   word-break: break-word;
+  box-shadow: 0 10px 24px rgba(59, 130, 246, 0.06);
 }
 
 .bobBubble {
-  background: #fff;
-  border: 1px solid #d0d7de;
-  border-bottom-left-radius: 3px;
-  color: #1f2328;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(88, 126, 255, 0.18);
+  border-bottom-left-radius: 4px;
+  color: #11213d;
 }
 
 .userBubble {
-  background: #1a7f64;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: #fff;
-  border-bottom-right-radius: 3px;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.22);
 }
 
 .systemBubble {
-  background: #dafbe1;
-  border: 1px solid #aceebb;
-  color: #116329;
+  background: #ebfff7;
+  border: 1px solid rgba(27, 156, 109, 0.18);
+  color: #0f5d43;
   font-size: 0.8rem;
   align-self: center;
   border-radius: 20px;
-  padding: 5px 14px;
+  padding: 6px 14px;
   max-width: 90%;
   text-align: center;
 }
@@ -143,9 +148,9 @@
 
 .typingDots span {
   display: inline-block;
-  width: 6px;
-  height: 6px;
-  background: #57606a;
+  width: 7px;
+  height: 7px;
+  background: #59709a;
   border-radius: 50%;
   animation: bounce 1.2s infinite;
 }
@@ -170,8 +175,10 @@
 }
 
 .inputArea {
-  background: #fff;
-  border-top: 1px solid #d0d7de;
+  background: rgba(255, 255, 255, 0.72);
+  border-top: 1px solid rgba(88, 126, 255, 0.18);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   padding: 14px 16px;
   flex-shrink: 0;
   max-width: 760px;
@@ -182,24 +189,24 @@
 .quickReplies {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
   margin-bottom: 10px;
 }
 
 .qrBtn {
-  background: #f6f8fa;
-  border: 1px solid #d0d7de;
-  color: #1f2328;
-  border-radius: 16px;
-  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(88, 126, 255, 0.18);
+  color: #11213d;
+  border-radius: 999px;
+  padding: 5px 12px;
   font-size: 0.78rem;
   cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
+  transition: 0.15s ease;
 }
 
 .qrBtn:hover {
-  background: #eaeef2;
-  border-color: #b0b7bf;
+  background: rgba(219, 234, 254, 0.7);
+  border-color: rgba(59, 130, 246, 0.28);
 }
 
 .inputRow {
@@ -210,52 +217,56 @@
 
 .textarea {
   flex: 1;
-  border: 1px solid #d0d7de;
-  border-radius: 8px;
-  padding: 9px 12px;
+  border: 1px solid rgba(88, 126, 255, 0.18);
+  border-radius: 12px;
+  padding: 10px 12px;
   font-family: inherit;
   font-size: 0.9rem;
-  color: #1f2328;
+  color: #11213d;
   resize: none;
-  background: #f6f8fa;
+  background: rgba(255, 255, 255, 0.72);
   line-height: 1.5;
-  transition: border-color 0.12s, background 0.12s;
+  transition: 0.15s ease;
 }
 
 .textarea:focus {
   outline: none;
-  border-color: #1a7f64;
-  background: #fff;
+  border-color: rgba(37, 99, 235, 0.5);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18);
 }
 
 .textarea::placeholder {
-  color: #8c959f;
+  color: #8aa0c1;
 }
 
 .btnSend {
-  background: #1a7f64;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: #fff;
   border: none;
-  border-radius: 8px;
-  padding: 9px 18px;
+  border-radius: 12px;
+  padding: 10px 18px;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.12s;
+  transition: 0.15s ease;
+  box-shadow: 0 12px 22px rgba(37, 99, 235, 0.18);
 }
 
 .btnSend:hover:not(:disabled) {
-  background: #156b54;
+  filter: brightness(1.02);
 }
 
 .btnSend:disabled {
-  background: #94d3c2;
+  background: linear-gradient(135deg, #cfe1ff, #bfd5ff);
+  color: rgba(17, 33, 61, 0.55);
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .inputHint {
   font-size: 0.72rem;
-  color: #8c959f;
+  color: #59709a;
   margin-top: 6px;
 }
