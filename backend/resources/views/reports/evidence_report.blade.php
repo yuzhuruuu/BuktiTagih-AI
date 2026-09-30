@@ -1,227 +1,317 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-        font-family: DejaVu Sans, sans-serif;
-        font-size: 11pt;
-        color: #11213d;
-        background: linear-gradient(180deg, #f2f8ff 0%, #edf4ff 100%);
-        padding: 36px 30px 28px;
-    }
-
-    .header {
-        background: rgba(255,255,255,0.72);
-        border: 1px solid rgba(88, 126, 255, 0.18);
-        border-radius: 18px;
-        padding: 18px 20px;
-        margin-bottom: 22px;
-        box-shadow: 0 10px 22px rgba(30, 72, 172, 0.06);
-    }
-
-    .header-brand {
-        font-size: 22pt;
-        font-weight: bold;
-        color: #1d4ed8;
-        letter-spacing: -0.5px;
-    }
-
-    .header-sub {
-        font-size: 9pt;
-        color: #59709a;
-        margin-top: 2px;
-    }
-
-    .header-meta {
-        text-align: right;
-        font-size: 8.5pt;
-        color: #59709a;
-        margin-top: -34px;
-    }
-
-    .section {
-        margin-bottom: 20px;
-        background: rgba(255,255,255,0.68);
-        border: 1px solid rgba(88, 126, 255, 0.15);
-        border-radius: 16px;
-        padding: 14px 16px;
-    }
-
-    .section-title {
-        font-size: 8pt;
-        font-weight: bold;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: #59709a;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-        padding-bottom: 6px;
-        margin-bottom: 10px;
-    }
-
-    .verdict-box {
-        background: rgba(219,234,254,0.55);
-        border: 1px solid rgba(96,165,250,0.2);
-        border-left: 4px solid #2563eb;
-        border-radius: 12px;
-        padding: 14px 18px;
-        margin-bottom: 8px;
-    }
-    .verdict-box.high   { background: rgba(255,241,243,0.9); border-color: rgba(214,40,57,0.18); border-left-color: #d62839; }
-    .verdict-box.medium { background: rgba(255,247,221,0.9); border-color: rgba(201,121,0,0.2); border-left-color: #c77b00; }
-    .verdict-box.low    { background: rgba(235,255,247,0.9); border-color: rgba(27,156,109,0.18); border-left-color: #1b9c6d; }
-    .verdict-box.pending{ background: rgba(255,255,255,0.7); border-color: rgba(148,163,184,0.2); border-left-color: #8aa0c1; }
-
-    .verdict-category {
-        font-size: 14pt;
-        font-weight: bold;
-        color: #11213d;
-    }
-    .verdict-severity {
-        font-size: 9pt;
-        color: #2d3d5f;
-        margin-top: 3px;
-    }
-    .verdict-confidence {
-        font-size: 9pt;
-        color: #59709a;
-        margin-top: 2px;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 10pt;
-    }
-    table td {
-        padding: 7px 10px;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.18);
-        vertical-align: top;
-    }
-    table td.key {
-        width: 35%;
-        color: #59709a;
-        font-weight: bold;
-    }
-    table td.val {
-        color: #11213d;
-    }
-
-    .text-box,
-    .reg-box {
-        background: rgba(255,255,255,0.7);
-        border: 1px solid rgba(96,165,250,0.18);
-        border-radius: 10px;
-        padding: 10px 12px;
-        font-size: 10pt;
-        color: #2d3d5f;
-        line-height: 1.6;
-    }
-
-    .reg-box {
-        background: rgba(219,234,254,0.45);
-        border-color: rgba(96,165,250,0.24);
-        color: #1d4ed8;
-    }
-
-    .disclaimer {
-        background: rgba(255,247,221,0.8);
-        border: 1px solid rgba(201,121,0,0.22);
-        border-radius: 12px;
-        padding: 10px 12px;
-        font-size: 8.5pt;
-        color: #7a5200;
-        margin-top: 22px;
-    }
-
-    .footer {
-        margin-top: 24px;
-        border-top: 1px solid rgba(148,163,184,0.25);
-        padding-top: 10px;
-        font-size: 8pt;
-        color: #7b8ba7;
-        text-align: center;
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Analisis Bukti - BuktiTagih</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .brand {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1d4ed8;
+            margin-bottom: 8px;
+        }
+        
+        .brand span { color: #2563eb; }
+        
+        .meta {
+            font-size: 12px;
+            color: #666;
+            text-align: right;
+            margin-top: 15px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1d4ed8;
+            border-left: 4px solid #2563eb;
+            padding-left: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .verdict-box {
+            background: #f0f4ff;
+            border: 2px solid #dbeafe;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .verdict-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .verdict-label {
+            font-weight: 600;
+            color: #2563eb;
+        }
+        
+        .verdict-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1d4ed8;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .badge-high {
+            background: rgba(214, 40, 57, 0.1);
+            color: #8a1d2d;
+            border: 1px solid rgba(214, 40, 57, 0.2);
+        }
+        
+        .badge-medium {
+            background: rgba(201, 121, 0, 0.1);
+            color: #7a5200;
+            border: 1px solid rgba(201, 121, 0, 0.22);
+        }
+        
+        .badge-low {
+            background: rgba(27, 156, 109, 0.1);
+            color: #116329;
+            border: 1px solid rgba(27, 156, 109, 0.2);
+        }
+        
+        .text-box {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 15px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        .regulation-item {
+            background: #f9fafb;
+            border-left: 4px solid #2563eb;
+            padding: 12px 15px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+        }
+        
+        .regulation-law {
+            font-weight: 700;
+            color: #1d4ed8;
+            margin-bottom: 4px;
+        }
+        
+        .regulation-article {
+            font-size: 13px;
+            color: #2563eb;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        
+        .regulation-note {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.5;
+        }
+        
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        .info-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .info-table td:first-child {
+            width: 35%;
+            font-weight: 600;
+            color: #2563eb;
+            background: #f9fafb;
+        }
+        
+        .info-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .footer {
+            border-top: 1px solid #e0e0e0;
+            margin-top: 40px;
+            padding-top: 20px;
+            font-size: 11px;
+            color: #666;
+            text-align: center;
+        }
+        
+        .disclaimer {
+            background: #fff7dd;
+            border: 1px solid rgba(201, 121, 0, 0.22);
+            border-radius: 6px;
+            padding: 12px 15px;
+            font-size: 12px;
+            color: #7a5200;
+            line-height: 1.6;
+            margin-top: 20px;
+        }
+        
+        @media print {
+            body { padding: 0; }
+            .container { box-shadow: none; }
+        }
+    </style>
 </head>
 <body>
 
-<!-- Header -->
-<div class="header">
-    <div class="header-brand">BuktiTagih AI</div>
-    <div class="header-sub">Platform Kecerdasan Bukti Digital — Laporan Analisis Evidence</div>
-    <div class="header-meta">
-        Dibuat: {{ $generated_at }}<br>
-        Evidence ID: #{{ $evidence->evidence_id }}
+<div class="container">
+    
+    <!-- Header -->
+    <div class="header">
+        <div class="brand">Bukti<span>Tagih</span></div>
+        <div style="font-size: 13px; color: #666; margin-top: 8px;">
+            Laporan Analisis Bukti Digital Penagihan Pinjol
+        </div>
+        <div class="meta">
+            <div>Dihasilkan: {{ $generated_at }}</div>
+            <div>Evidence ID: #{{ $evidence->evidence_id }}</div>
+        </div>
     </div>
-</div>
 
-<!-- Verdict -->
-<div class="section">
-    <div class="section-title">Hasil Klasifikasi AI</div>
-    @php
-        $severityClass = strtolower($analysis->severity ?? 'pending');
-        if (!in_array($severityClass, ['high','medium','low'])) $severityClass = 'pending';
-    @endphp
-    <div class="verdict-box {{ $severityClass }}">
-        <div class="verdict-category">{{ $category_label }}</div>
-        <div class="verdict-severity">Tingkat Keparahan: <strong>{{ $severity_label }}</strong></div>
-        <div class="verdict-confidence">Tingkat Keyakinan AI: <strong>{{ $confidence_pct }}</strong></div>
+    <!-- Hasil Klasifikasi -->
+    <div class="section">
+        <div class="section-title">Hasil Klasifikasi</div>
+        
+        <div class="verdict-box">
+            <div class="verdict-row">
+                <span class="verdict-label">Kategori Pelanggaran:</span>
+                <span class="badge badge-{{ strtolower($severity_label) === 'Tinggi' ? 'high' : (strtolower($severity_label) === 'Sedang' ? 'medium' : 'low') }}">
+                    {{ $category_label }}
+                </span>
+            </div>
+            
+            <div class="verdict-row">
+                <span class="verdict-label">Tingkat Keparahan:</span>
+                <span class="verdict-value">{{ $severity_label }}</span>
+            </div>
+            
+            <div class="verdict-row">
+                <span class="verdict-label">Tingkat Keyakinan AI:</span>
+                <span class="verdict-value">{{ $confidence_pct }}</span>
+            </div>
+        </div>
     </div>
-</div>
 
-<!-- Alasan -->
-<div class="section">
-    <div class="section-title">Alasan Analisis AI</div>
-    <div class="text-box">{{ $analysis->reason ?? 'Menunggu proses AI pipeline...' }}</div>
-</div>
+    <!-- Alasan Analisis -->
+    <div class="section">
+        <div class="section-title">Alasan Analisis</div>
+        <div class="text-box">{{ $analysis->reason ?? 'Analisis sedang diproses...' }}</div>
+    </div>
 
-<!-- Regulasi -->
-<div class="section">
-    <div class="section-title">Referensi Regulasi</div>
-    <div class="reg-box">{{ $analysis->regulation_reference ?? 'Referensi regulasi belum tersedia. Pipeline RAG belum terhubung.' }}</div>
-</div>
+    <!-- Referensi Regulasi -->
+    @if($analysis && $analysis->regulation_reference)
+        <div class="section">
+            <div class="section-title">Referensi Regulasi</div>
+            
+            @php
+                $regulations = is_string($analysis->regulation_reference) 
+                    ? json_decode($analysis->regulation_reference, true) 
+                    : $analysis->regulation_reference;
+                
+                if (!is_array($regulations)) {
+                    $regulations = [];
+                }
+            @endphp
+            
+            @forelse($regulations as $reg)
+                <div class="regulation-item">
+                    <div class="regulation-law">{{ $reg['law'] ?? $reg['title'] ?? 'Regulasi' }}</div>
+                    @if(isset($reg['article']) || isset($reg['pasal']))
+                        <div class="regulation-article">{{ $reg['article'] ?? $reg['pasal'] ?? '' }}</div>
+                    @endif
+                    <div class="regulation-note">{{ $reg['note'] ?? $reg['description'] ?? '' }}</div>
+                </div>
+            @empty
+                <div style="color: #999; font-style: italic;">Referensi regulasi tidak tersedia</div>
+            @endforelse
+        </div>
+    @endif
 
-<!-- Data Evidence -->
-<div class="section">
-    <div class="section-title">Informasi Bukti yang Dianalisis</div>
-    <table>
-        <tr>
-            <td class="key">Evidence ID</td>
-            <td class="val">#{{ $evidence->evidence_id }}</td>
-        </tr>
-        <tr>
-            <td class="key">Nama File</td>
-            <td class="val">{{ $evidence->file_name }}</td>
-        </tr>
-        <tr>
-            <td class="key">Tipe File</td>
-            <td class="val">{{ $evidence->file_type }}</td>
-        </tr>
-        <tr>
-            <td class="key">Waktu Upload</td>
-            <td class="val">{{ $evidence->upload_time }}</td>
-        </tr>
-        <tr>
-            <td class="key">Hash File (SHA-256)</td>
-            <td class="val" style="font-size:8pt; word-break:break-all;">{{ $evidence->hash_file }}</td>
-        </tr>
-    </table>
-</div>
+    <!-- Informasi Bukti (TANPA Entities - untuk PII safety) -->
+    <div class="section">
+        <div class="section-title">Informasi Bukti</div>
+        
+        <table class="info-table">
+            <tr>
+                <td>Evidence ID</td>
+                <td>#{{ $evidence->evidence_id }}</td>
+            </tr>
+            <tr>
+                <td>Nama File</td>
+                <td>{{ $evidence->file_name }}</td>
+            </tr>
+            <tr>
+                <td>Tipe File</td>
+                <td>{{ $evidence->file_type }}</td>
+            </tr>
+            <tr>
+                <td>Waktu Upload</td>
+                <td>{{ $evidence->upload_time ?? $evidence->created_at }}</td>
+            </tr>
+            <tr>
+                <td>Hash File (SHA-256)</td>
+                <td style="font-family: monospace; font-size: 11px; word-break: break-all;">{{ $evidence->hash_file }}</td>
+            </tr>
+        </table>
+    </div>
 
-<!-- Disclaimer -->
-<div class="disclaimer">
-    <strong>Perhatian:</strong> Laporan ini dihasilkan oleh sistem AI BuktiTagih dan <strong>bukan merupakan nasihat hukum</strong>.
-    Gunakan laporan ini sebagai bahan pendukung pengaduan ke OJK, AFPI, lembaga bantuan hukum, atau kuasa hukum.
-    Keputusan hukum tetap berada di tangan profesional hukum yang berwenang.
-</div>
+    <!-- Disclaimer -->
+    <div class="disclaimer">
+        <strong>Perhatian Penting:</strong> Laporan ini dihasilkan oleh sistem AI dan <strong>bukan merupakan nasihat hukum profesional</strong>. 
+        Gunakan laporan ini sebagai bahan pendukung untuk pengaduan resmi ke OJK, AFPI, lembaga bantuan hukum, atau kuasa hukum. 
+        Keputusan hukum final harus didasarkan pada konsultasi dengan profesional hukum yang berpengalaman.
+    </div>
 
-<!-- Footer -->
-<div class="footer">
-    BuktiTagih AI — IBM SkillsBuild University Education National Hackathon 2026 &nbsp;·&nbsp;
-    Laporan dibuat otomatis oleh sistem AI. Dokumen ini bersifat rahasia.
+    <!-- Footer -->
+    <div class="footer">
+        <div>BuktiTagih AI - Platform Analisis Bukti Digital Penagihan Pinjol</div>
+        <div style="margin-top: 8px;">www.buktitagih.ai | Laporan ini dibuat pada {{ date('d F Y H:i:s') }} WIB</div>
+    </div>
+
 </div>
 
 </body>

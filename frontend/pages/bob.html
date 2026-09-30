@@ -281,29 +281,11 @@
     </div>
 </div>
 
-<script>
-const API_BASE   = 'http://127.0.0.1:8000/api';
-const params     = new URLSearchParams(window.location.search);
-const analysisId = params.get('analysis_id');
+<script type="module">
+import { getAnalysis } from '../services/api.js';
+import { getUrlParam, delay } from '../services/utils.js';
 
-const messagesEl   = document.getElementById('messages');
-const chatInput    = document.getElementById('chatInput');
-const sendBtn      = document.getElementById('sendBtn');
-const contextStrip = document.getElementById('contextStrip');
-const ctxId        = document.getElementById('ctxAnalysisId');
-const backBtn      = document.getElementById('backToResult');
-const quickReplies = document.getElementById('quickReplies');
-
-let analysisContext = null;
-
-if (analysisId) {
-    ctxId.textContent = analysisId;
-    contextStrip.classList.add('show');
-    backBtn.href = `result.html?analysis_id=${analysisId}`;
-}
-
-// ─── Knowledge base Bob ──────────────────────────────────────────────────
-// Nanti digantikan dengan panggilan ke Langflow + Gemini API.
+// ─── Constants ────────────────────────────────────────────────────────────
 const BOB_KB = {
     HARASSMENT: `Kategori **Intimidasi (HARASSMENT)** berarti bukti kamu mengandung perilaku intimidatif dari pihak penagih — misalnya ancaman verbal, bahasa kasar berulang, atau tekanan psikologis yang berlebihan.\n\nIni melanggar:\n• POJK No. 22/POJK.07/2020 — Perlindungan Konsumen Sektor Jasa Keuangan\n• AFPI Code of Conduct — larangan penagihan yang merendahkan martabat`,
     THREAT:     `Kategori **Ancaman (THREAT)** berarti terdapat ancaman nyata dalam bukti kamu — misalnya ancaman penyebaran data, ancaman fisik, atau ancaman hukum yang tidak berdasar.\n\nIni melanggar:\n• KUHP Pasal 335 — perbuatan tidak menyenangkan / ancaman\n• UU ITE Pasal 29 — ancaman kekerasan melalui media elektronik\n• POJK No. 22/POJK.07/2020`,
@@ -316,6 +298,26 @@ const BOB_KB = {
     default:    `Saya Bob, asisten analisis BuktiTagih.\n\nSaya bisa membantu kamu memahami:\n• Hasil klasifikasi AI (Intimidasi, Ancaman, Kebocoran Data, Spam)\n• Regulasi yang dilanggar\n• Langkah tindak lanjut ke OJK atau AFPI\n• Cara menggunakan laporan PDF\n\nCoba gunakan tombol cepat di bawah, atau tanyakan langsung.`
 };
 
+// ─── URL Parameters ──────────────────────────────────────────────────────
+const analysisId = getUrlParam('analysis_id');
+const messagesEl   = document.getElementById('messages');
+const chatInput    = document.getElementById('chatInput');
+const sendBtn      = document.getElementById('sendBtn');
+const contextStrip = document.getElementById('contextStrip');
+const ctxId        = document.getElementById('ctxAnalysisId');
+const backBtn      = document.getElementById('backToResult');
+const quickReplies = document.getElementById('quickReplies');
+
+let analysisContext = null;
+
+// Setup context jika ada analysis_id
+if (analysisId) {
+    ctxId.textContent = analysisId;
+    contextStrip.classList.add('show');
+    backBtn.href = `result.html?analysis_id=${analysisId}`;
+}
+
+// ─── Bob Knowledge Base Logic ────────────────────────────────────────────
 function getBobReply(msg) {
     const m = msg.toLowerCase();
     if (m.includes('harassment') || m.includes('intimidasi')) return BOB_KB.HARASSMENT;
@@ -337,7 +339,7 @@ function getBobReply(msg) {
     return BOB_KB.default;
 }
 
-// ─── Render helpers ──────────────────────────────────────────────────────
+// ─── Render Helpers ──────────────────────────────────────────────────────
 function addMessage(role, text) {
     const row = document.createElement('div');
     row.className = `msg-row ${role === 'user' ? 'user' : role === 'system' ? '' : 'bob'}`;
@@ -372,9 +374,12 @@ function addTyping() {
     messagesEl.appendChild(row);
     messagesEl.scrollTop = messagesEl.scrollHeight;
 }
-function removeTyping() { document.getElementById('typing')?.remove(); }
 
-// ─── Send ────────────────────────────────────────────────────────────────
+function removeTyping() { 
+    document.getElementById('typing')?.remove(); 
+}
+
+// ─── Send Message Handler ────────────────────────────────────────────────
 async function sendMessage(text) {
     const msg = text.trim();
     if (!msg) return;
@@ -386,7 +391,8 @@ async function sendMessage(text) {
     addMessage('user', msg);
     addTyping();
 
-    await new Promise(r => setTimeout(r, 600 + Math.random() * 500));
+    // Simulate typing delay
+    await delay(600 + Math.random() * 500);
 
     removeTyping();
     addMessage('bob', getBobReply(msg));
@@ -396,31 +402,31 @@ async function sendMessage(text) {
 
 sendBtn.addEventListener('click', () => sendMessage(chatInput.value));
 chatInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(chatInput.value); }
+    if (e.key === 'Enter' && !e.shiftKey) { 
+        e.preventDefault(); 
+        sendMessage(chatInput.value); 
+    }
 });
 quickReplies.querySelectorAll('.qr-btn').forEach(btn => {
     btn.addEventListener('click', () => sendMessage(btn.dataset.msg));
 });
 
-// ─── Init ────────────────────────────────────────────────────────────────
+// ─── Initialize ──────────────────────────────────────────────────────────
 async function init() {
     let welcome = `Halo! Saya **Bob**, asisten analisis BuktiTagih.\n\nSaya di sini untuk membantu kamu memahami hasil analisis dan menjelaskan langkah selanjutnya yang bisa kamu ambil.`;
 
     if (analysisId) {
         try {
-            const res = await fetch(`${API_BASE}/analysis/${analysisId}`, {
-                headers: { 'Accept': 'application/json' }
-            });
-            if (res.ok) {
-                analysisContext = await res.json();
-                const cat = analysisContext.category;
-                if (cat && cat !== 'PENDING') {
-                    welcome += `\n\nSaya sudah membaca hasil analisis: bukti diidentifikasi sebagai **${cat}**. Mau saya jelaskan lebih lanjut?`;
-                } else {
-                    welcome += `\n\nHasil analisis masih diproses. Kamu tetap bisa bertanya seputar kategori pelanggaran atau langkah tindak lanjut.`;
-                }
+            analysisContext = await getAnalysis(parseInt(analysisId));
+            const cat = analysisContext.category;
+            if (cat && cat !== 'PENDING') {
+                welcome += `\n\nSaya sudah membaca hasil analisis: bukti diidentifikasi sebagai **${cat}**. Mau saya jelaskan lebih lanjut?`;
+            } else {
+                welcome += `\n\nHasil analisis masih diproses. Kamu tetap bisa bertanya seputar kategori pelanggaran atau langkah tindak lanjut.`;
             }
-        } catch (_) {}
+        } catch (err) {
+            console.error('Failed to load analysis context:', err);
+        }
     } else {
         welcome += `\n\nKamu bisa tanya tentang kategori pelanggaran, regulasi yang berlaku, atau cara melaporkan ke OJK dan AFPI.`;
     }

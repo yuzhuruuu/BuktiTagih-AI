@@ -422,39 +422,37 @@
 
 </div>
 
-<script>
-const API_BASE = 'http://127.0.0.1:8000/api';
+<script type="module">
+import { 
+    getAnalysis, 
+    getAnalysisByEvidence, 
+    downloadPdfReport,
+    getPdfReportUrl 
+} from '../services/api.js';
+import { 
+    getUrlParam, 
+    CATEGORY_LABELS, 
+    SEVERITY_LABELS, 
+    SEVERITY_CLASSES 
+} from '../services/utils.js';
 
-const params     = new URLSearchParams(window.location.search);
-const analysisId = params.get('analysis_id');
-const evidenceId = params.get('evidence_id');
+// ─── Parse URL Parameters ────────────────────────────────────────────────
+const analysisId = getUrlParam('analysis_id');
+const evidenceId = getUrlParam('evidence_id');
 
-const CATEGORY_LABEL = {
-    HARASSMENT:    'Intimidasi',
-    THREAT:        'Ancaman',
-    DATA_EXPOSURE: 'Kebocoran Data',
-    SPAM:          'Spam',
-    NORMAL:        'Normal',
-    PENDING:       'Menunggu Proses AI',
-};
-const SEVERITY_LABEL = {
-    HIGH:    'Tinggi',
-    MEDIUM:  'Sedang',
-    LOW:     'Rendah',
-    PENDING: 'Pending',
-};
-const SEVERITY_CLASS = { HIGH: 'high', MEDIUM: 'medium', LOW: 'low', PENDING: 'pending' };
-
+// ─── UI Helpers ─────────────────────────────────────────────────────────
 function showResult() {
     document.getElementById('loadingState').style.display = 'none';
     document.getElementById('resultState').style.display  = 'block';
 }
+
 function showError(m) {
     document.getElementById('loadingState').style.display = 'none';
     document.getElementById('errorState').style.display   = 'block';
     document.getElementById('errorMsg').textContent = m;
 }
 
+// ─── Load Analysis Data ──────────────────────────────────────────────────
 async function loadAnalysis() {
     if (!analysisId && !evidenceId) {
         showError('Parameter tidak ditemukan di URL. Kembali ke halaman upload.');
@@ -462,14 +460,13 @@ async function loadAnalysis() {
     }
 
     try {
-        // Pakai analysis_id langsung jika ada; fallback ke endpoint by-evidence
-        const url = analysisId
-            ? `${API_BASE}/analysis/${analysisId}`
-            : `${API_BASE}/analysis/by-evidence/${evidenceId}`;
-
-        const res  = await fetch(url, { headers: { 'Accept': 'application/json' } });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+        // Fetch analysis — gunakan analysis_id jika ada, fallback ke evidence_id
+        let data;
+        if (analysisId) {
+            data = await getAnalysis(parseInt(analysisId));
+        } else {
+            data = await getAnalysisByEvidence(parseInt(evidenceId));
+        }
 
         // Sub heading
         document.getElementById('subHeading').textContent =
@@ -480,17 +477,17 @@ async function loadAnalysis() {
         const cat = (data.category || 'PENDING').toUpperCase();
         const sev = (data.severity || 'PENDING').toUpperCase();
         const banner = document.getElementById('verdictBanner');
-        banner.className = `verdict-banner ${SEVERITY_CLASS[sev] || 'pending'}`;
+        banner.className = `verdict-banner ${SEVERITY_CLASSES[sev] || 'pending'}`;
 
         const catBadge = document.getElementById('categoryBadge');
-        catBadge.textContent = CATEGORY_LABEL[cat] || cat;
+        catBadge.textContent = CATEGORY_LABELS[cat] || cat;
         catBadge.className = `badge-cat ${cat}`;
 
         const sevBadge = document.getElementById('severityBadge');
-        sevBadge.textContent = SEVERITY_LABEL[sev] || sev;
+        sevBadge.textContent = SEVERITY_LABELS[sev] || sev;
         sevBadge.className = `badge-sev ${sev}`;
 
-        // Confidence — skala 0–100, langsung tampilkan
+        // Confidence — skala 0–100
         const conf = data.confidence ? Math.round(parseFloat(data.confidence)) : 0;
         document.getElementById('confidencePct').textContent = conf + '%';
         setTimeout(() => { document.getElementById('confidenceFill').style.width = conf + '%'; }, 100);
@@ -498,10 +495,35 @@ async function loadAnalysis() {
         // Reason & regulation
         document.getElementById('reasonBox').textContent =
             data.reason || 'Menunggu proses AI pipeline…';
-        document.getElementById('regulationBox').textContent =
-            data.regulation_reference || 'Referensi regulasi belum tersedia.';
+        
+        // Parse regulation_reference dari JSON string ke array
+        let regulations = [];
+        if (typeof data.regulation_reference === 'string') {
+            try {
+                regulations = JSON.parse(data.regulation_reference);
+            } catch (e) {
+                regulations = [];
+            }
+        } else if (Array.isArray(data.regulation_reference)) {
+            regulations = data.regulation_reference;
+        }
+        
+        // Render regulation references sebagai list
+        if (regulations.length > 0) {
+            const regHtml = regulations.map(reg => 
+                `<div style="margin-bottom: 12px; padding: 10px; background: rgba(219,234,254,0.5); border-radius: 8px;">
+                    <div style="font-weight: 700; color: #1d4ed8; margin-bottom: 4px;">${reg.law || reg.title || 'Regulasi'}</div>
+                    <div style="font-size: 0.9rem; color: #2563eb; margin-bottom: 4px;">${reg.article || reg.pasal || ''}</div>
+                    <div style="font-size: 0.85rem; color: #59709a;">${reg.note || reg.description || ''}</div>
+                </div>`
+            ).join('');
+            document.getElementById('regulationBox').innerHTML = regHtml;
+        } else {
+            document.getElementById('regulationBox').textContent =
+                data.regulation_reference || 'Referensi regulasi belum tersedia.';
+        }
 
-        // Evidence meta
+        // Evidence metadata
         const ev = data.evidence;
         if (ev) {
             const rows = [
@@ -517,17 +539,20 @@ async function loadAnalysis() {
             document.getElementById('evidenceCard').style.display = 'none';
         }
 
-        // Buttons
+        // Download button setup
         const eid = evidenceId || ev?.evidence_id;
         const dlBtn = document.getElementById('downloadBtn');
         if (eid) {
-            dlBtn.href = `${API_BASE}/report/${eid}`;
+            dlBtn.href = getPdfReportUrl(eid);
             dlBtn.setAttribute('download', `BuktiTagih_Laporan_${eid}.pdf`);
         } else {
             dlBtn.classList.add('disabled');
         }
         document.getElementById('bobBtn').href =
             `bob.html?analysis_id=${analysisId || ''}`;
+
+        // Note: Entities are stored in DB for audit trail but not displayed
+        // in frontend/PDF for PII safety (Option B - Medium Security)
 
         showResult();
 

@@ -503,27 +503,11 @@
 
 </div>
 
-<script>
-const API_BASE = 'http://127.0.0.1:8000/api';
+<script type="module">
+import { uploadEvidence } from '../services/api.js';
+import { getSessionUserId, formatBytes, getFileIcon } from '../services/utils.js';
 
-function getSessionUserId() {
-    let uid = sessionStorage.getItem('buktitagih_uid');
-    if (!uid) { uid = crypto.randomUUID(); sessionStorage.setItem('buktitagih_uid', uid); }
-    return uid;
-}
-
-function formatBytes(b) {
-    if (b < 1024) return b + ' B';
-    if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
-    return (b / 1048576).toFixed(1) + ' MB';
-}
-
-function fileIcon(name) {
-    if (/\.(jpg|jpeg|png)$/i.test(name)) return '🖼️';
-    if (/\.pdf$/i.test(name)) return '📑';
-    return '📄';
-}
-
+// ─── DOM Elements ────────────────────────────────────────────────────────
 const dropZone    = document.getElementById('dropZone');
 const fileInput   = document.getElementById('evidenceFile');
 const filePreview = document.getElementById('filePreview');
@@ -544,19 +528,25 @@ const resEvidenceId = document.getElementById('resEvidenceId');
 const goToResult   = document.getElementById('goToResult');
 const retryBtn     = document.getElementById('retryBtn');
 
+// ─── Event Listeners ────────────────────────────────────────────────────
 dropZone.addEventListener('click', () => fileInput.click());
 dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
-dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('over'); if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
+dropZone.addEventListener('drop', e => { 
+    e.preventDefault(); 
+    dropZone.classList.remove('over'); 
+    if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); 
+});
 fileInput.addEventListener('change', () => { if (fileInput.files[0]) setFile(fileInput.files[0]); });
 clearBtn.addEventListener('click', clearFile);
 retryBtn.addEventListener('click', clearFile);
 
+// ─── UI Helpers ─────────────────────────────────────────────────────────
 function setFile(f) {
     fileInput._file = f;
     fileNameEl.textContent = f.name;
     fileSizeEl.textContent = formatBytes(f.size);
-    fileIconEl.textContent = fileIcon(f.name);
+    fileIconEl.textContent = getFileIcon(f.name);
     filePreview.classList.add('show');
     dropZone.style.display = 'none';
     submitBtn.disabled = false;
@@ -587,6 +577,7 @@ function setProgress(pct, label) {
     progressPct.textContent = pct + '%';
 }
 
+// ─── Form Submit Handler ─────────────────────────────────────────────────
 document.getElementById('uploadForm').addEventListener('submit', async e => {
     e.preventDefault();
     const file = fileInput._file;
@@ -596,22 +587,16 @@ document.getElementById('uploadForm').addEventListener('submit', async e => {
     setProgress(20, 'Mengunggah file…');
 
     try {
-        const fd = new FormData();
-        fd.append('file', file);
-        fd.append('user_id', getSessionUserId());
-
-        const res  = await fetch(`${API_BASE}/evidence/upload`, { method: 'POST', body: fd });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+        const data = await uploadEvidence(file, getSessionUserId());
 
         setProgress(100, 'Selesai!');
         progressWrap.style.display = 'none';
 
         resEvidenceId.textContent = data.evidence_id;
-        // analysis_id bisa ada di data.ai_process.analysis_id jika Langflow berhasil,
-        // atau fallback ke evidence_id untuk navigasi ke halaman hasil
         const analysisId = data.ai_process?.analysis_id ?? '';
-        goToResult.href = `result.html?evidence_id=${data.evidence_id}${analysisId ? '&analysis_id=' + analysisId : ''}`;
+        goToResult.href = `result.html?evidence_id=${data.evidence_id}${
+            analysisId ? '&analysis_id=' + analysisId : ''
+        }`;
         successAlert.classList.add('show');
         statusArea.style.display = 'block';
 

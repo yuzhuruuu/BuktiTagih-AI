@@ -25,12 +25,12 @@ class EvidenceController extends Controller
 
         // Simpan file fisik ke public disk dengan nama hash
         $filePath = $file->storeAs(
-            'evidence',  // directory dalam public disk
+            'evidence',
             $hashFile . '.' . $file->getClientOriginalExtension(),
-            'public'  // explicit disk
+            'public'
         );
 
-        // Simpan record ke DB terlebih dahulu untuk mendapatkan evidence_id yang valid
+        // Simpan record evidence ke DB
         $evidenceId = DB::table('evidence')->insertGetId([
             'user_id'     => $request->user_id,
             'file_name'   => $file->getClientOriginalName(),
@@ -42,43 +42,42 @@ class EvidenceController extends Controller
             'updated_at'  => now(),
         ]);
 
-        // Panggil Service AI dengan evidence_id yang sudah valid
-        // File disimpan ke public disk, jadi path = storage/app/public/{$filePath}
+        // Panggil Langflow AI Analysis
         $actualFilePath = storage_path('app/public/' . $filePath);
         $aiService = new AiAnalysisService();
-        $aiResult  = $aiService->analyzeDocument($evidenceId, $actualFilePath);
+        $aiResult = $aiService->analyzeDocument($evidenceId, $actualFilePath);
 
         $aiSuccess = ($aiResult['status'] ?? '') === 'success';
 
-        // Selalu buat row ai_analysis — isi hasil AI kalau sukses, PENDING kalau belum/gagal
-        DB::table('ai_analysis')->insert([
+        // Insert ai_analysis record
+        $analysisId = DB::table('ai_analysis')->insertGetId([
             'evidence_id'          => $evidenceId,
-            'category'             => $aiSuccess ? ($aiResult['category']             ?? 'PENDING') : 'PENDING',
-            'severity'             => $aiSuccess ? ($aiResult['severity']             ?? 'PENDING') : 'PENDING',
-            'reason'               => $aiSuccess ? ($aiResult['reason']               ?? null)      : 'Menunggu proses AI pipeline...',
-            'confidence'           => $aiSuccess ? ($aiResult['confidence']           ?? 0)         : 0,
-            'regulation_reference' => $aiSuccess ? ($aiResult['regulation_reference'] ?? null)      : null,
+            'category'             => $aiSuccess ? ($aiResult['category'] ?? 'PENDING') : 'PENDING',
+            'severity'             => $aiSuccess ? ($aiResult['severity'] ?? 'PENDING') : 'PENDING',
+            'reason'               => $aiSuccess ? ($aiResult['reason'] ?? null) : 'Menunggu proses AI pipeline...',
+            'confidence'           => $aiSuccess ? (int)($aiResult['confidence'] ?? 0) : 0,
+            'regulation_reference' => $aiSuccess ? json_encode($aiResult['regulation_reference'] ?? []) : null,
             'created_at'           => now(),
             'updated_at'           => now(),
         ]);
 
-        // Simpan entities ke tabel extracted_entity jika AI sukses dan ada data entities
-        if ($aiSuccess && ! empty($aiResult['entities']) && is_array($aiResult['entities'])) {
+        // Extract and save entities
+        if ($aiSuccess && !empty($aiResult['entities']) && is_array($aiResult['entities'])) {
             $entityRows = [];
             foreach ($aiResult['entities'] as $entity) {
-                if (empty($entity['type']) || empty($entity['value'])) {
+                if (empty($entity['entity_type']) || empty($entity['entity_value'])) {
                     continue;
                 }
                 $entityRows[] = [
                     'evidence_id'  => $evidenceId,
-                    'entity_type'  => $entity['type'],
-                    'entity_value' => $entity['value'],
+                    'entity_type'  => $entity['entity_type'],
+                    'entity_value' => $entity['entity_value'],
                     'confidence'   => $entity['confidence'] ?? null,
                     'created_at'   => now(),
                     'updated_at'   => now(),
                 ];
             }
-            if (! empty($entityRows)) {
+            if (!empty($entityRows)) {
                 DB::table('extracted_entity')->insert($entityRows);
             }
         }
@@ -86,7 +85,17 @@ class EvidenceController extends Controller
         return response()->json([
             'evidence_id'   => $evidenceId,
             'upload_status' => 'success',
-            'ai_process'    => $aiResult
+            'ai_process'    => [
+                'status'                 => $aiResult['status'] ?? 'unknown',
+                'message'                => $aiResult['message'] ?? null,
+                'analysis_id'            => $analysisId,
+                'category'               => $aiResult['category'] ?? 'PENDING',
+                'severity'               => $aiResult['severity'] ?? 'PENDING',
+                'reason'                 => $aiResult['reason'] ?? null,
+                'confidence'             => $aiResult['confidence'] ?? 0,
+                'regulation_reference'   => $aiResult['regulation_reference'] ?? [],
+                'entities_count'         => count($aiResult['entities'] ?? []),
+            ]
         ], 201);
     }
 

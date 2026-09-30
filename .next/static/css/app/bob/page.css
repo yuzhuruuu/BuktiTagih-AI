@@ -1,0 +1,276 @@
+/*!******************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[5].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[5].use[3]!./app/bob/bob.module.css ***!
+  \******************************************************************************************************************************************************************************************************************************************************************/
+.bob_nav__SxMGY {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(88, 126, 255, 0.18);
+  box-shadow: 0 1px 0 rgba(18, 47, 103, 0.04);
+  padding: 0 24px;
+  height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.bob_brand__to2d4 {
+  font-weight: 800;
+  font-size: 1.08rem;
+  color: #11213d;
+  letter-spacing: -0.04em;
+}
+
+.bob_brand__to2d4 span {
+  color: #2563eb;
+}
+
+.bob_navRight__e2b5q {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bob_navLabel__kGObc {
+  font-size: 0.8rem;
+  color: #59709a;
+}
+
+.bob_btnBack__SdNkP {
+  font-size: 0.8rem;
+  color: #59709a;
+  text-decoration: none;
+  border: 1px solid rgba(88, 126, 255, 0.18);
+  padding: 7px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.72);
+  transition: 0.15s ease;
+}
+
+.bob_btnBack__SdNkP:hover {
+  background: rgba(219, 234, 254, 0.7);
+  color: #11213d;
+}
+
+.bob_contextStrip__ChXov {
+  background: rgba(219, 234, 254, 0.8);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  padding: 8px 24px;
+  font-size: 0.8rem;
+  color: #1d4ed8;
+  flex-shrink: 0;
+}
+
+.bob_contextStrip__ChXov strong {
+  font-weight: 700;
+}
+
+.bob_chatWrapper__6D1d8 {
+  flex: 1 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.bob_messages__x_MyY {
+  flex: 1 1;
+  overflow-y: auto;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.bob_msgRow__KgwZX {
+  display: flex;
+  flex-direction: column;
+}
+
+.bob_msgRow__KgwZX.bob_user___uZei {
+  align-items: flex-end;
+}
+
+.bob_msgRow__KgwZX.bob_bob__M3VrC {
+  align-items: flex-start;
+}
+
+.bob_msgLabel__3cmWD {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  color: #59709a;
+}
+
+.bob_bubble__4LGyV {
+  max-width: 72%;
+  padding: 12px 14px;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  box-shadow: 0 10px 24px rgba(59, 130, 246, 0.06);
+}
+
+.bob_bobBubble__pYdg_ {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(88, 126, 255, 0.18);
+  border-bottom-left-radius: 4px;
+  color: #11213d;
+}
+
+.bob_userBubble__3gHaG {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.22);
+}
+
+.bob_systemBubble__ltnW1 {
+  background: #ebfff7;
+  border: 1px solid rgba(27, 156, 109, 0.18);
+  color: #0f5d43;
+  font-size: 0.8rem;
+  align-self: center;
+  border-radius: 20px;
+  padding: 6px 14px;
+  max-width: 90%;
+  text-align: center;
+}
+
+.bob_typingDots___uChg {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.bob_typingDots___uChg span {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: #59709a;
+  border-radius: 50%;
+  animation: bob_bounce__wn9G0 1.2s infinite;
+}
+
+.bob_typingDots___uChg span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.bob_typingDots___uChg span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bob_bounce__wn9G0 {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-5px);
+  }
+}
+
+.bob_inputArea__AyWiz {
+  background: rgba(255, 255, 255, 0.72);
+  border-top: 1px solid rgba(88, 126, 255, 0.18);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 14px 16px;
+  flex-shrink: 0;
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.bob_quickReplies__Jf2Jc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.bob_qrBtn__UducZ {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(88, 126, 255, 0.18);
+  color: #11213d;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.bob_qrBtn__UducZ:hover {
+  background: rgba(219, 234, 254, 0.7);
+  border-color: rgba(59, 130, 246, 0.28);
+}
+
+.bob_inputRow__5Dwmm {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.bob_textarea__UOfyi {
+  flex: 1 1;
+  border: 1px solid rgba(88, 126, 255, 0.18);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: #11213d;
+  resize: none;
+  background: rgba(255, 255, 255, 0.72);
+  line-height: 1.5;
+  transition: 0.15s ease;
+}
+
+.bob_textarea__UOfyi:focus {
+  outline: none;
+  border-color: rgba(37, 99, 235, 0.5);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18);
+}
+
+.bob_textarea__UOfyi::placeholder {
+  color: #8aa0c1;
+}
+
+.bob_btnSend__ENRLj {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.15s ease;
+  box-shadow: 0 12px 22px rgba(37, 99, 235, 0.18);
+}
+
+.bob_btnSend__ENRLj:hover:not(:disabled) {
+  filter: brightness(1.02);
+}
+
+.bob_btnSend__ENRLj:disabled {
+  background: linear-gradient(135deg, #cfe1ff, #bfd5ff);
+  color: rgba(17, 33, 61, 0.55);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.bob_inputHint__PfAcZ {
+  font-size: 0.72rem;
+  color: #59709a;
+  margin-top: 6px;
+}
+

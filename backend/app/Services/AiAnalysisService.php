@@ -7,235 +7,244 @@ use Illuminate\Support\Facades\Log;
 
 class AiAnalysisService
 {
-    protected string $langflowUrl;
-    protected string $flowId;
-    protected string $apiKey;
-    protected string $chatInputId;
+    private $langflowUrl;
+    private $langflowFlowId;
+    private $langflowApiKey;
+    private $langflowChatInputId;
 
     public function __construct()
     {
-        $this->langflowUrl  = rtrim(config('services.langflow.url', 'http://localhost:7860'), '/');
-        $this->flowId       = config('services.langflow.flow_id', '');
-        $this->apiKey       = config('services.langflow.api_key', '');
-        $this->chatInputId  = config('services.langflow.chat_input_id', 'ChatInput-0');
-    }
+        $this->langflowUrl = env('LANGFLOW_URL', 'http://127.0.0.1:7860');
+        $this->langflowFlowId = env('LANGFLOW_FLOW_ID');
+        $this->langflowApiKey = env('LANGFLOW_API_KEY');
+        $this->langflowChatInputId = env('LANGFLOW_CHAT_INPUT_ID', 'ChatInput-aPEX5');
 
-    /**
-     * Kirim evidence ke Langflow untuk diproses AI.
-     * Jika Langflow belum dikonfigurasi (LANGFLOW_FLOW_ID kosong), kembalikan status simulasi.
-     */
-    public function analyzeDocument(int $evidenceId, string $filePath): array
-    {
-        if (empty($this->flowId)) {
-            return [
-                'status'      => 'processing',
-                'message'     => 'Dokumen berhasil diteruskan ke sistem AI.',
-                'evidence_id' => $evidenceId,
-            ];
+        if (!$this->langflowFlowId || !$this->langflowApiKey) {
+            throw new \Exception('Langflow configuration missing in .env');
         }
-
-        return $this->sendToLangflow($evidenceId, $filePath);
     }
 
     /**
-     * Waktu timeout yang aman untuk request upload file dari aplikasi local.
-     * PHP server di project ini hanya punya limit 60s, jadi request Langflow
-     * tidak boleh menunggu terlalu lama agar upload tetap bisa selesai.
-     */
-    private function langflowHttpOptions(): array
-    {
-        return [
-            'connect_timeout' => 10,
-            'timeout'         => 20,
-        ];
-    }
-
-    /**
-     * Alur dua langkah sesuai usulan Person A:
-     * 1. Upload file ke Langflow /api/v1/files/upload/{flow_id}
-     * 2. Run flow dengan file tersebut di-tweak ke komponen Chat Input
+     * Analyze document (image/PDF) through Langflow
+     * 2-step process:
+     *   1. Upload file to Langflow
+     *   2. Run flow with file reference
      *
-     * @return array ['status', 'category', 'severity', 'reason', 'confidence', 'regulation_reference', 'entities']
+     * @param int $evidenceId
+     * @param string $filePath Full path to file
+     * @return array Analysis result with category, severity, reason, confidence, entities
+     * @throws \Exception
      */
-    public function sendToLangflow(int $evidenceId, string $filePath): array
+    public function analyzeDocument($evidenceId, $filePath)
     {
         try {
-            // Verify file exists
-            if (! file_exists($filePath)) {
-                Log::error('File tidak ditemukan', [
-                    'evidence_id' => $evidenceId,
-                    'file_path'   => $filePath,
-                ]);
-                return ['status' => 'error', 'message' => 'File tidak ditemukan.'];
-            }
+            Log::info("Starting Langflow analysis", ['evidence_id' => $evidenceId, 'file' => basename($filePath)]);
 
-            // ── Langkah 1: upload file ──────────────────────────────────────────
-            $uploadEndpoint = "{$this->langflowUrl}/api/v1/files/upload/{$this->flowId}";
+            // Step 1: Upload file
+            $uploadedFilePath = $this->uploadFileToLangflow($filePath);
+            Log::info("File uploaded to Langflow", ['uploaded_path' => $uploadedFilePath]);
 
-            Log::info('Langflow: Mulai upload file', [
-                'evidence_id' => $evidenceId,
-                'endpoint'    => $uploadEndpoint,
-                'file_size'   => filesize($filePath),
-            ]);
+            // Step 2: Run flow with uploaded file
+            $analysisResult = $this->runLangflowAnalysis($uploadedFilePath);
+            Log::info("Langflow analysis completed", ['evidence_id' => $evidenceId, 'category' => $analysisResult['category']]);
 
-            // Gunakan file_get_contents untuk ensure proper multipart encoding
-            $uploadResponse = Http::withHeaders($this->authHeaders())
-                ->withOptions($this->langflowHttpOptions())
-                ->attach('file', file_get_contents($filePath), basename($filePath))
-                ->post($uploadEndpoint);
+            // Step 3: Enrich with regulation references
+            $category = $analysisResult['category'] ?? 'PENDING';
+            $regulationRef = $this->getRegulationReferenceForCategory($category);
 
-            if (! $uploadResponse->successful()) {
-                Log::error('Langflow file upload gagal', [
-                    'evidence_id' => $evidenceId,
-                    'status'      => $uploadResponse->status(),
-                    'body'        => $uploadResponse->body(),
-                ]);
-                return [
-                    'status'  => 'processing',
-                    'message' => 'File berhasil disimpan. Proses AI menunggu Langflow siap.',
-                    'evidence_id' => $evidenceId,
-                ];
-            }
-
-            $responseData = $uploadResponse->json();
-            Log::info('Langflow upload response', ['evidence_id' => $evidenceId, 'response' => $responseData]);
-
-            $langflowFilePath = $responseData['file_path'] ?? $responseData['flowId'] ?? null;
-
-            if (empty($langflowFilePath)) {
-                Log::error('Langflow upload response tidak mengandung file_path', [
-                    'evidence_id' => $evidenceId,
-                    'response'    => $responseData,
-                ]);
-                return [
-                    'status'  => 'processing',
-                    'message' => 'File berhasil disimpan. Proses AI menunggu Langflow siap.',
-                    'evidence_id' => $evidenceId,
-                ];
-            }
-
-            Log::info('Langflow: Upload file berhasil', [
-                'evidence_id'      => $evidenceId,
-                'file_path'        => $langflowFilePath,
-            ]);
-
-            // ── Langkah 2: run flow ─────────────────────────────────────────────
-            $runEndpoint = "{$this->langflowUrl}/api/v1/run/{$this->flowId}";
-
-            Log::info('Langflow: Mulai run flow', [
-                'evidence_id'  => $evidenceId,
-                'endpoint'     => $runEndpoint,
-                'chat_input_id' => $this->chatInputId,
-            ]);
-
-            $runResponse = Http::withHeaders($this->authHeaders())
-                ->withOptions($this->langflowHttpOptions())
-                ->asJson()
-                ->post($runEndpoint, [
-                    'input_type'  => 'chat',
-                    'output_type' => 'chat',
-                    'input_value' => 'Analisis bukti terlampir.',
-                    'tweaks'      => [
-                        $this->chatInputId => [
-                            'files' => $langflowFilePath,
-                        ],
-                    ],
-                ]);
-
-            if (! $runResponse->successful()) {
-                Log::error('Langflow run flow gagal', [
-                    'evidence_id' => $evidenceId,
-                    'status'      => $runResponse->status(),
-                    'body'        => $runResponse->body(),
-                ]);
-                return [
-                    'status'  => 'processing',
-                    'message' => 'File berhasil disimpan. Proses AI menunggu Langflow siap.',
-                    'evidence_id' => $evidenceId,
-                ];
-            }
-
-            Log::info('Langflow: Run flow berhasil', ['evidence_id' => $evidenceId]);
-
-            return $this->parseRunResponse($runResponse->json());
-
-        } catch (\Illuminate\Http\Client\ConnectionException $e) {
-            Log::error('Langflow connection timeout', [
-                'evidence_id'   => $evidenceId,
-                'error'         => $e->getMessage(),
-                'langflow_url'  => $this->langflowUrl,
-            ]);
             return [
-                'status' => 'processing',
-                'message' => 'File berhasil disimpan. Proses AI sedang menunggu koneksi Langflow.',
-                'evidence_id' => $evidenceId,
+                'status' => 'success',
+                'analysis_id' => null,  // Will be set after DB insert
+                'category' => $analysisResult['category'],
+                'severity' => $analysisResult['severity'],
+                'reason' => $analysisResult['reason'],
+                'confidence' => $analysisResult['confidence'],
+                'regulation_reference' => $regulationRef,
+                'entities' => $analysisResult['entities'] ?? [],
             ];
 
         } catch (\Exception $e) {
-            Log::error('Langflow error', [
+            Log::error("Langflow analysis failed", [
                 'evidence_id' => $evidenceId,
-                'error'       => $e->getMessage(),
-                'trace'       => $e->getTraceAsString(),
+                'error' => $e->getMessage(),
             ]);
+
             return [
-                'status' => 'processing',
-                'message' => 'File berhasil disimpan. Proses AI sedang menunggu Langflow.',
-                'evidence_id' => $evidenceId,
+                'status' => 'error',
+                'message' => $e->getMessage(),
+                'category' => 'PENDING',
+                'severity' => 'PENDING',
+                'reason' => 'Analisis gagal memproses bukti. Silakan coba lagi.',
+                'confidence' => 0,
             ];
         }
     }
 
     /**
-     * Ekstrak field yang dibutuhkan dari respons JSON Langflow /run.
-     * Langflow membungkus output di outputs[0].outputs[0].results.message.data.text
+     * Step 1: Upload file to Langflow
+     * POST /api/v1/files/upload/{FLOW_ID}
      */
-    private function parseRunResponse(array $response): array
+    private function uploadFileToLangflow($filePath)
     {
-        // Path yang benar: results.message.data.text (bukan hanya results.message.text)
-        $raw = $response['outputs'][0]['outputs'][0]['results']['message']['data']['text'] ?? null;
-
-        if (empty($raw)) {
-            Log::warning('Langflow run response tidak mengandung output teks', ['response' => $response]);
-            return ['status' => 'error', 'message' => 'Tidak ada output teks dari Langflow.'];
+        if (!file_exists($filePath)) {
+            throw new \Exception("File not found: $filePath");
         }
 
-        // Langflow kadang membungkus JSON di dalam markdown code fence ```json ... ```
-        $cleaned = preg_replace('/^```(?:json)?\s*/i', '', trim($raw));
-        $cleaned = preg_replace('/\s*```$/', '', $cleaned);
+        $uploadUrl = "{$this->langflowUrl}/api/v1/files/upload/{$this->langflowFlowId}";
+        
+        $response = Http::withHeaders([
+            'x-api-key' => $this->langflowApiKey,
+        ])->attach(
+            'file',
+            fopen($filePath, 'r'),
+            basename($filePath)
+        )->post($uploadUrl);
 
-        $parsed = json_decode($cleaned, true);
-
-        if (json_last_error() !== JSON_ERROR_NONE || ! is_array($parsed)) {
-            Log::warning('Output Langflow bukan JSON valid', ['raw' => $raw]);
-            return ['status' => 'error', 'message' => 'Output Langflow bukan JSON valid.', 'raw' => $raw];
+        if (!$response->successful()) {
+            throw new \Exception(
+                "File upload failed: " . $response->status() . " " . $response->body()
+            );
         }
 
-        return [
-            'status'               => 'success',
-            'category'             => $parsed['category']             ?? 'PENDING',
-            'severity'             => $parsed['severity']             ?? 'PENDING',
-            'reason'               => $parsed['reason']               ?? null,
-            // confidence dari Langflow skala 0–100, simpan apa adanya (kolom decimal(5,2))
-            'confidence'           => $parsed['confidence']           ?? 0,
-            'regulation_reference' => isset($parsed['regulation_reference'])
-                                        ? json_encode($parsed['regulation_reference'])
-                                        : null,
-            'entities'             => $parsed['entities']             ?? [],
-        ];
+        $data = $response->json();
+        $uploadedPath = $data['file_path'] ?? null;
+
+        if (!$uploadedPath) {
+            throw new \Exception("No file_path in Langflow response");
+        }
+
+        return $uploadedPath;
     }
 
     /**
-     * Header autentikasi saja — Content-Type tidak di-set di sini
-     * agar tidak menimpa multipart/form-data boundary saat upload file.
+     * Step 2: Run Langflow flow with uploaded file
+     * POST /api/v1/run/{FLOW_ID}
      */
-    private function authHeaders(): array
+    private function runLangflowAnalysis($uploadedFilePath)
     {
-        $headers = [];
+        $runUrl = "{$this->langflowUrl}/api/v1/run/{$this->langflowFlowId}";
 
-        if (! empty($this->apiKey)) {
-            $headers['x-api-key'] = $this->apiKey;
+        $payload = [
+            'output_type' => 'chat',
+            'input_type' => 'chat',
+            'input_value' => 'Analisis bukti terlampir.',
+            'tweaks' => [
+                $this->langflowChatInputId => [
+                    'files' => $uploadedFilePath,
+                ]
+            ]
+        ];
+
+        $response = Http::withHeaders([
+            'x-api-key' => $this->langflowApiKey,
+            'Content-Type' => 'application/json',
+        ])->post($runUrl, $payload);
+
+        if (!$response->successful()) {
+            throw new \Exception(
+                "Langflow flow failed: " . $response->status() . " " . $response->body()
+            );
         }
 
-        return $headers;
+        $data = $response->json();
+
+        // Extract message from nested response
+        $messageText = $data['outputs'][0]['outputs'][0]['results']['message']['text'] ?? null;
+
+        if (!$messageText) {
+            throw new \Exception("Unexpected Langflow response structure");
+        }
+
+        // Parse JSON from message
+        $analysis = json_decode($messageText, true);
+
+        if (!$analysis) {
+            throw new \Exception("Failed to parse JSON from Langflow response: " . substr($messageText, 0, 200));
+        }
+
+        // Validate required fields
+        $required = ['category', 'severity', 'reason', 'confidence'];
+        foreach ($required as $field) {
+            if (!isset($analysis[$field])) {
+                throw new \Exception("Missing required field in analysis: $field");
+            }
+        }
+
+        // Ensure confidence is integer (0-100)
+        $analysis['confidence'] = (int)$analysis['confidence'];
+
+        return $analysis;
+    }
+
+    /**
+     * Get regulation references untuk category tertentu
+     * Simplified RAG: hardcoded per category
+     */
+    private function getRegulationReferenceForCategory($category)
+    {
+        $regulationMap = [
+            'HARASSMENT' => [
+                [
+                    'law' => 'POJK No. 22/POJK.07/2020',
+                    'article' => 'Perlindungan Konsumen Sektor Jasa Keuangan',
+                    'note' => 'Larangan perilaku intimidatif dan merendahkan martabat dalam penagihan'
+                ],
+                [
+                    'law' => 'AFPI Code of Conduct',
+                    'article' => 'Standar Etika Penagihan',
+                    'note' => 'Penagihan hanya boleh dilakukan dengan cara yang hormat dan profesional'
+                ]
+            ],
+            'THREAT' => [
+                [
+                    'law' => 'KUHP',
+                    'article' => 'Pasal 335',
+                    'note' => 'Perbuatan yang menyebabkan ketakutan atau kecemasan bagi orang lain'
+                ],
+                [
+                    'law' => 'UU ITE',
+                    'article' => 'Pasal 29',
+                    'note' => 'Ancaman kekerasan melalui media elektronik'
+                ],
+                [
+                    'law' => 'POJK No. 22/POJK.07/2020',
+                    'article' => 'Perlindungan Konsumen',
+                    'note' => 'Larangan penggunaan kekerasan atau ancaman dalam penagihan'
+                ]
+            ],
+            'DATA_EXPOSURE' => [
+                [
+                    'law' => 'UU No. 27 Tahun 2022',
+                    'article' => 'Perlindungan Data Pribadi (UU PDP)',
+                    'note' => 'Perlindungan data pribadi termasuk identitas, lokasi, dan informasi sensitif'
+                ],
+                [
+                    'law' => 'POJK No. 1/POJK.07/2013',
+                    'article' => 'Kerahasiaan Data Konsumen',
+                    'note' => 'Lembaga jasa keuangan wajib menjaga kerahasiaan data konsumen'
+                ]
+            ],
+            'SPAM' => [
+                [
+                    'law' => 'AFPI Code of Conduct',
+                    'article' => 'Pembatasan Frekuensi Kontak',
+                    'note' => 'Penagihan hanya boleh dilakukan pada jam yang wajar dan tidak berlebihan'
+                ],
+                [
+                    'law' => 'UU ITE',
+                    'article' => 'Pasal 27',
+                    'note' => 'Larangan penggunaan sistem informasi untuk mengganggu atau membuat malu'
+                ]
+            ],
+            'NORMAL' => [
+                [
+                    'law' => 'Tidak ada indikasi pelanggaran',
+                    'article' => 'Proses penagihan normal',
+                    'note' => 'Bukti yang diupload tidak menunjukkan tanda-tanda pelanggaran regulasi'
+                ]
+            ],
+        ];
+
+        return $regulationMap[$category] ?? $regulationMap['NORMAL'];
     }
 }
