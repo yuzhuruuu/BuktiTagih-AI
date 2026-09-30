@@ -147,11 +147,10 @@ Ini adalah target, bukan hasil pengujian.
 ## Roadmap
 
 - [x] Desain arsitektur dan alur AI
-- [ ] Pipeline Langflow + IBM Granite
-- [ ] OCR, ekstraksi entitas, klasifikasi
-- [ ] Knowledge base regulasi (RAG)
-- [ ] UI, laporan PDF, alur Bob
-- [ ] Pengujian dan demo
+- [x] Pipeline Langflow + IBM Granite
+- [x] OCR, ekstraksi entitas, klasifikasi
+- [x] Knowledge base regulasi (RAG)
+- [x] UI, laporan PDF, alur Bob
 
 ## Tim
 
