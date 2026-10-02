@@ -242,36 +242,39 @@
         <div class="text-box">{{ $analysis->reason ?? 'Analisis sedang diproses...' }}</div>
     </div>
 
-    <!-- Referensi Regulasi -->
+    <!-- Referensi Regulasi — hanya tampil jika ada dan tidak NORMAL/SPAM kosong -->
     @if($analysis && $analysis->regulation_reference)
-        <div class="section">
-            <div class="section-title">Referensi Regulasi</div>
+        @php
+            $regulations = is_string($analysis->regulation_reference) 
+                ? json_decode($analysis->regulation_reference, true) 
+                : $analysis->regulation_reference;
             
-            @php
-                $regulations = is_string($analysis->regulation_reference) 
-                    ? json_decode($analysis->regulation_reference, true) 
-                    : $analysis->regulation_reference;
+            if (!is_array($regulations)) {
+                $regulations = [];
+            }
+            
+            // Filter out "no violation" references untuk kategori NORMAL/SPAM
+            if (in_array($analysis->category, ['NORMAL', 'SPAM'])) {
+                $regulations = [];
+            }
+        @endphp
+        
+        @if(count($regulations) > 0)
+            <div class="section">
+                <div class="section-title">Referensi Regulasi</div>
                 
-                if (!is_array($regulations)) {
-                    $regulations = [];
-                }
-            @endphp
-            
-            @forelse($regulations as $reg)
-                <div class="regulation-item">
-                    <div class="regulation-law">{{ $reg['law'] ?? $reg['title'] ?? 'Regulasi' }}</div>
-                    @if(isset($reg['article']) || isset($reg['pasal']))
-                        <div class="regulation-article">{{ $reg['article'] ?? $reg['pasal'] ?? '' }}</div>
-                    @endif
-                    <div class="regulation-note">{{ $reg['note'] ?? $reg['description'] ?? '' }}</div>
-                </div>
-            @empty
-                <div style="color: #999; font-style: italic;">Referensi regulasi tidak tersedia</div>
-            @endforelse
-        </div>
+                @foreach($regulations as $reg)
+                    <div class="regulation-item">
+                        <div class="regulation-law">{{ $reg['law'] ?? $reg['title'] ?? 'Regulasi' }}</div>
+                        @if(isset($reg['article']) || isset($reg['pasal']))
+                            <div class="regulation-article">{{ $reg['article'] ?? $reg['pasal'] ?? '' }}</div>
+                        @endif
+                        <div class="regulation-note">{{ $reg['note'] ?? $reg['description'] ?? '' }}</div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
     @endif
-
-    <!-- Informasi Bukti (TANPA Entities - untuk PII safety) -->
     <div class="section">
         <div class="section-title">Informasi Bukti</div>
         

@@ -148,8 +148,14 @@ class AiAnalysisService
 
         $data = $response->json();
 
-        // Extract message from nested response
-        $messageText = $data['outputs'][0]['outputs'][0]['results']['message']['text'] ?? null;
+        // Parse JSON from message — handle wrapped markdown (```)
+        $messageText = trim($data['outputs'][0]['outputs'][0]['results']['message']['text'] ?? '');
+        
+        // Strip markdown code blocks jika ada
+        if (str_starts_with($messageText, '```')) {
+            $messageText = preg_replace('/^```json?\n?|\n?```$/m', '', $messageText);
+            $messageText = trim($messageText);
+        }
 
         if (!$messageText) {
             throw new \Exception("Unexpected Langflow response structure");
@@ -159,6 +165,7 @@ class AiAnalysisService
         $analysis = json_decode($messageText, true);
 
         if (!$analysis) {
+            Log::error("JSON parse failed", ['response' => substr($messageText, 0, 200)]);
             throw new \Exception("Failed to parse JSON from Langflow response: " . substr($messageText, 0, 200));
         }
 

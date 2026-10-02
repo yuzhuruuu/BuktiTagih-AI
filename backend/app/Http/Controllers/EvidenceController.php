@@ -45,7 +45,36 @@ class EvidenceController extends Controller
         // Panggil Langflow AI Analysis
         $actualFilePath = storage_path('app/public/' . $filePath);
         $aiService = new AiAnalysisService();
-        $aiResult = $aiService->analyzeDocument($evidenceId, $actualFilePath);
+        
+        try {
+            $aiResult = $aiService->analyzeDocument($evidenceId, $actualFilePath);
+        } catch (\Exception $e) {
+            // Handle rate limit atau server errors gracefully
+            $errorMsg = $e->getMessage();
+            
+            // Check if rate limited or server error
+            if (str_contains($errorMsg, '429') || str_contains($errorMsg, 'quota') || str_contains($errorMsg, 'limit')) {
+                $aiResult = [
+                    'status' => 'error',
+                    'message' => 'Sistem sedang sibuk. Silakan coba lagi dalam beberapa saat.',
+                    'category' => 'PENDING',
+                    'severity' => 'PENDING',
+                    'reason' => 'Menunggu proses AI pipeline...',
+                    'confidence' => 0,
+                ];
+                \Log::warning("Langflow rate limit: $errorMsg");
+            } else {
+                $aiResult = [
+                    'status' => 'error',
+                    'message' => 'Analisis gagal memproses bukti. Silakan coba lagi.',
+                    'category' => 'PENDING',
+                    'severity' => 'PENDING',
+                    'reason' => 'Menunggu proses AI pipeline...',
+                    'confidence' => 0,
+                ];
+                \Log::error("Langflow analysis error: $errorMsg");
+            }
+        }
 
         $aiSuccess = ($aiResult['status'] ?? '') === 'success';
 
