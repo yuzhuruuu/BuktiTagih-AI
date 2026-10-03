@@ -37,7 +37,7 @@ flowchart TD
     API --> LF[Langflow Orchestration]
     LF --> OCR[OCR]
     LF --> RAG[RAG: Vector DB Regulasi]
-    LF --> G[IBM Granite Reasoning]
+    LF --> G[AI Model Reasoning]
     OCR --> A[Evidence Analysis]
     RAG --> A
     G --> A
@@ -55,7 +55,7 @@ Chunk 700 token dengan overlap 150 token. Metadata per chunk: `source, category,
 
 **Online: analisis bukti** (dijalankan tiap user submit bukti)
 
-`File Input → OCR → Cleaning → Entity Extraction → Violation Classification → Retriever → IBM Granite Reasoning → JSON → PDF`
+`File Input → OCR → Cleaning → Entity Extraction → Violation Classification → Retriever → AI Model Reasoning → JSON → PDF`
 
 ## Tech stack
 
@@ -64,7 +64,7 @@ Chunk 700 token dengan overlap 150 token. Metadata per chunk: `source, category,
 | Frontend | React / Next.js |
 | Backend | Evidence API, file storage |
 | Orkestrasi AI | Langflow |
-| LLM | IBM Granite |
+| LLM | AI Model |
 | Retrieval | Vector database + embedding model |
 | Ingestion regulasi | Unstructured.io, LlamaIndex, PyMuPDF |
 | Output | PDF report generator |
@@ -118,7 +118,7 @@ cd BuktiTagih-AI
 
 # 2. Environment
 cp .env.example .env
-# isi: kredensial IBM Granite, endpoint Langflow, konfigurasi vector DB
+# isi: kredensial AI Model, endpoint Langflow, konfigurasi vector DB
 
 # 3. Backend
 cd backend
@@ -147,7 +147,7 @@ Ini adalah target, bukan hasil pengujian.
 ## Roadmap
 
 - [x] Desain arsitektur dan alur AI
-- [x] Pipeline Langflow + IBM Granite
+- [x] Pipeline Langflow + AI Model
 - [x] OCR, ekstraksi entitas, klasifikasi
 - [x] Knowledge base regulasi (RAG)
 - [x] UI, laporan PDF, alur Bob
@@ -156,7 +156,7 @@ Ini adalah target, bukan hasil pengujian.
 
 | Peran | Fokus |
 |---|---|
-| AI Workflow Engineer | Langflow, IBM Granite, RAG, prompt engineering, AI testing |
+| AI Workflow Engineer | Langflow, AI Model, RAG, prompt engineering, AI testing |
 | Product Engineer | Backend, upload, database, frontend, PDF report, antarmuka Bob |
 
 ## Privasi
