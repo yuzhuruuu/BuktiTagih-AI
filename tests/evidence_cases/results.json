@@ -8,7 +8,7 @@
     "actual_severity": "HIGH",
     "category_match": true,
     "severity_match": true,
-    "confidence": 95
+    "confidence": 100
   },
   {
     "id": 2,
@@ -30,7 +30,7 @@
     "actual_severity": "LOW",
     "category_match": true,
     "severity_match": true,
-    "confidence": 95
+    "confidence": 100
   },
   {
     "id": 4,
@@ -52,7 +52,7 @@
     "actual_severity": "HIGH",
     "category_match": true,
     "severity_match": true,
-    "confidence": 95
+    "confidence": 100
   },
   {
     "id": 6,
@@ -63,8 +63,7 @@
     "actual_severity": "HIGH",
     "category_match": true,
     "severity_match": true,
-    "confidence": 95,
-    "notes": "Retest setelah prompt diperbaiki (definisi DATA_EXPOSURE diperluas mencakup status utang). Sebelumnya HARASSMENT (miss)."
+    "confidence": 95
   },
   {
     "id": 7,
@@ -75,7 +74,7 @@
     "actual_severity": "HIGH",
     "category_match": true,
     "severity_match": true,
-    "confidence": 95
+    "confidence": 100
   },
   {
     "id": 8,
@@ -108,7 +107,7 @@
     "actual_severity": "LOW",
     "category_match": true,
     "severity_match": true,
-    "confidence": 95
+    "confidence": 100
   },
   {
     "id": 11,
@@ -116,11 +115,10 @@
     "expected_category": "SPAM",
     "expected_severity": "MEDIUM",
     "actual_category": "SPAM",
-    "actual_severity": "LOW",
+    "actual_severity": "MEDIUM",
     "category_match": true,
-    "severity_match": false,
-    "confidence": 95,
-    "notes": "Retest setelah prompt diperbaiki (SPAM diperluas mencakup flooding pesan identik). Sebelumnya HARASSMENT (miss). Severity kini LOW, sebelumnya MEDIUM (juga tidak cocok, arah berbeda)."
+    "severity_match": true,
+    "confidence": 95
   },
   {
     "id": 12,
@@ -142,7 +140,7 @@
     "actual_severity": "LOW",
     "category_match": true,
     "severity_match": true,
-    "confidence": 95
+    "confidence": 100
   },
   {
     "id": 14,
@@ -153,7 +151,7 @@
     "actual_severity": "LOW",
     "category_match": true,
     "severity_match": true,
-    "confidence": 95
+    "confidence": 100
   },
   {
     "id": 15,
@@ -186,7 +184,7 @@
     "actual_severity": "MEDIUM",
     "category_match": true,
     "severity_match": true,
-    "confidence": 95
+    "confidence": 90
   },
   {
     "id": 18,
@@ -197,7 +195,7 @@
     "actual_severity": "LOW",
     "category_match": true,
     "severity_match": true,
-    "confidence": 95
+    "confidence": 100
   },
   {
     "id": 19,
@@ -208,7 +206,7 @@
     "actual_severity": "HIGH",
     "category_match": true,
     "severity_match": true,
-    "confidence": 95
+    "confidence": 100
   },
   {
     "id": 20,
@@ -219,7 +217,6 @@
     "actual_severity": "HIGH",
     "category_match": true,
     "severity_match": false,
-    "confidence": 95,
-    "notes": "Retest setelah prompt diperbaiki (aturan pembeda menegaskan pola bersyarat tetap THREAT walau konsekuensi tidak spesifik). Sebelumnya HARASSMENT (miss). Severity kini HIGH, sebelumnya MEDIUM (juga tidak cocok, arah berbeda)."
+    "confidence": 85
   }
 ]

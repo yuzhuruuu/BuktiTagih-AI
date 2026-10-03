@@ -6,7 +6,7 @@ import requests
 import os
 import uuid
 
-api_key = 'sk-txqdRQ0QsbFGXq-m15Pj_9_qppZpgb6FoCUDcadDDw0'
+api_key = os.environ["LANGFLOW_API_KEY"]
 flow_id = "e05721f1-c3a2-4a33-bbd2-d30dee3df995"
 img_path = r"D:\HBB\BuktiTagih-AI\screenshotstes\testeks1.jpg"   # ganti sesuai lokasi gambar di laptopmu
 

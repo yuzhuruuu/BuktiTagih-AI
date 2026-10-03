@@ -1,0 +1,218 @@
+{
+  "summary": {
+    "model": "gemini-3.8-flash",
+    "n_cases": 20,
+    "n_ok": 8,
+    "avg_seconds": 33.1,
+    "median_seconds": 17.82,
+    "min_seconds": 5.32,
+    "max_seconds": 118.61,
+    "est_100_sequential_minutes": 55.2
+  },
+  "results": [
+    {
+      "id": 1,
+      "input": "Kalau tidak bayar hari ini, kami sebar data keluarga kamu.",
+      "expected_category": "THREAT",
+      "expected_severity": "HIGH",
+      "actual_category": "THREAT",
+      "actual_severity": "HIGH",
+      "category_match": true,
+      "severity_match": true,
+      "confidence": 95,
+      "entities": [
+        {
+          "entity_type": "key_event",
+          "entity_value": "ancaman penyebaran data keluarga jika tidak membayar tagihan",
+          "confidence": 95
+        }
+      ],
+      "duration_seconds": 14.63
+    },
+    {
+      "id": 2,
+      "input": "Kami tahu alamat rumah kamu. Tunggu saja.",
+      "expected_category": "HARASSMENT",
+      "expected_severity": "HIGH",
+      "actual_category": "HARASSMENT",
+      "actual_severity": "HIGH",
+      "category_match": true,
+      "severity_match": true,
+      "confidence": 95,
+      "entities": [],
+      "duration_seconds": 21.01
+    },
+    {
+      "id": 3,
+      "input": "Tagihan Anda jatuh tempo besok. Silakan lakukan pembayaran.",
+      "expected_category": "NORMAL",
+      "expected_severity": "LOW",
+      "actual_category": "NORMAL",
+      "actual_severity": "LOW",
+      "category_match": true,
+      "severity_match": true,
+      "confidence": 95,
+      "entities": [
+        {
+          "entity_type": "key_event",
+          "entity_value": "Pengingat jatuh tempo tagihan",
+          "confidence": 95
+        }
+      ],
+      "duration_seconds": 37.1
+    },
+    {
+      "id": 4,
+      "input": "Kami kirim foto KTP Anda ke grup.",
+      "expected_category": "DATA_EXPOSURE",
+      "expected_severity": "HIGH",
+      "actual_category": "DATA_EXPOSURE",
+      "actual_severity": "HIGH",
+      "category_match": true,
+      "severity_match": true,
+      "confidence": 95,
+      "entities": [
+        {
+          "entity_type": "key_event",
+          "entity_value": "kirim foto KTP ke grup",
+          "confidence": 95
+        }
+      ],
+      "duration_seconds": 7.1
+    },
+    {
+      "id": 5,
+      "input": "Jika hutang kamu tidak dilunasi sebelum jam 12 malam ini, kami akan hubungi seluruh kontak di HP kamu dan beritahu mereka soal hutangmu.",
+      "expected_category": "THREAT",
+      "expected_severity": "HIGH",
+      "actual_category": "THREAT",
+      "actual_severity": "HIGH",
+      "category_match": true,
+      "severity_match": true,
+      "confidence": 98,
+      "entities": [
+        {
+          "entity_type": "date_time",
+          "entity_value": "jam 12 malam ini",
+          "confidence": 90
+        },
+        {
+          "entity_type": "key_event",
+          "entity_value": "ancaman menghubungi seluruh kontak ponsel jika utang tidak dilunasi",
+          "confidence": 95
+        }
+      ],
+      "duration_seconds": 14.14
+    },
+    {
+      "id": 6,
+      "input": "Bos kamu sudah kami hubungi. Atasan kamu tahu kamu punya hutang yang belum dibayar.",
+      "expected_category": "DATA_EXPOSURE",
+      "expected_severity": "HIGH",
+      "actual_category": "DATA_EXPOSURE",
+      "actual_severity": "HIGH",
+      "category_match": true,
+      "severity_match": true,
+      "confidence": 95,
+      "entities": [
+        {
+          "entity_type": "key_event",
+          "entity_value": "Penagih menghubungi atasan dan memberitahukan perihal utang korban",
+          "confidence": 90
+        }
+      ],
+      "duration_seconds": 118.61
+    },
+    {
+      "id": 7,
+      "input": "Bayar sekarang atau kami datang ke rumah kamu. Kami sudah tahu di mana kamu tinggal.",
+      "expected_category": "THREAT",
+      "expected_severity": "HIGH",
+      "actual_category": "THREAT",
+      "actual_severity": "HIGH",
+      "category_match": true,
+      "severity_match": true,
+      "confidence": 95,
+      "entities": [
+        {
+          "entity_type": "key_event",
+          "entity_value": "ancaman mendatangi rumah korban jika tidak segera membayar",
+          "confidence": 95
+        }
+      ],
+      "duration_seconds": 46.91
+    },
+    {
+      "id": 8,
+      "input": "Foto profil WhatsApp kamu beserta nama lengkap dan nomor pinjaman sudah kami bagikan ke grup Facebook.",
+      "expected_category": "DATA_EXPOSURE",
+      "expected_severity": "HIGH",
+      "actual_category": "DATA_EXPOSURE",
+      "actual_severity": "HIGH",
+      "category_match": true,
+      "severity_match": true,
+      "confidence": 95,
+      "entities": [
+        {
+          "entity_type": "organization",
+          "entity_value": "Facebook",
+          "confidence": 90
+        },
+        {
+          "entity_type": "key_event",
+          "entity_value": "penyebaran foto profil WhatsApp, nama lengkap, dan nomor pinjaman ke grup Facebook",
+          "confidence": 95
+        }
+      ],
+      "duration_seconds": 5.32
+    },
+    {
+      "id": 9,
+      "error": "500 Server Error: Internal Server Error for url: http://127.0.0.1:7860/api/v1/run/e05721f1-c3a2-4a33-bbd2-d30dee3df995"
+    },
+    {
+      "id": 10,
+      "error": "500 Server Error: Internal Server Error for url: http://127.0.0.1:7860/api/v1/run/e05721f1-c3a2-4a33-bbd2-d30dee3df995"
+    },
+    {
+      "id": 11,
+      "error": "500 Server Error: Internal Server Error for url: http://127.0.0.1:7860/api/v1/run/e05721f1-c3a2-4a33-bbd2-d30dee3df995"
+    },
+    {
+      "id": 12,
+      "error": "500 Server Error: Internal Server Error for url: http://127.0.0.1:7860/api/v1/run/e05721f1-c3a2-4a33-bbd2-d30dee3df995"
+    },
+    {
+      "id": 13,
+      "error": "500 Server Error: Internal Server Error for url: http://127.0.0.1:7860/api/v1/run/e05721f1-c3a2-4a33-bbd2-d30dee3df995"
+    },
+    {
+      "id": 14,
+      "error": "500 Server Error: Internal Server Error for url: http://127.0.0.1:7860/api/v1/run/e05721f1-c3a2-4a33-bbd2-d30dee3df995"
+    },
+    {
+      "id": 15,
+      "error": "500 Server Error: Internal Server Error for url: http://127.0.0.1:7860/api/v1/run/e05721f1-c3a2-4a33-bbd2-d30dee3df995"
+    },
+    {
+      "id": 16,
+      "error": "500 Server Error: Internal Server Error for url: http://127.0.0.1:7860/api/v1/run/e05721f1-c3a2-4a33-bbd2-d30dee3df995"
+    },
+    {
+      "id": 17,
+      "error": "500 Server Error: Internal Server Error for url: http://127.0.0.1:7860/api/v1/run/e05721f1-c3a2-4a33-bbd2-d30dee3df995"
+    },
+    {
+      "id": 18,
+      "error": "500 Server Error: Internal Server Error for url: http://127.0.0.1:7860/api/v1/run/e05721f1-c3a2-4a33-bbd2-d30dee3df995"
+    },
+    {
+      "id": 19,
+      "error": "500 Server Error: Internal Server Error for url: http://127.0.0.1:7860/api/v1/run/e05721f1-c3a2-4a33-bbd2-d30dee3df995"
+    },
+    {
+      "id": 20,
+      "error": "500 Server Error: Internal Server Error for url: http://127.0.0.1:7860/api/v1/run/e05721f1-c3a2-4a33-bbd2-d30dee3df995"
+    }
+  ]
+}

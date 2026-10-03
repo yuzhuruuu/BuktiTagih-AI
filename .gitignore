@@ -1,3 +1,13 @@
-﻿langflow/simpananpenting.txt
+langflow/simpananpenting.txt
 screenshotstes/
 node_modules
+tests/f1_entity/*.jpg
+tests/f1_entity/*.jpeg
+tests/f1_entity/*.png
+tests/f1_entity/entity_cases.json
+tests/f1_entity/entity_results*.json
+.env
+simpananpenting.txt
+
+__pycache__/
+*.pyc

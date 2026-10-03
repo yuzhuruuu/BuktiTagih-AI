@@ -354,7 +354,7 @@
         },
         "id": "ChatInput-aPEX5",
         "measured": {
-          "height": 51,
+          "height": 52,
           "width": 192
         },
         "position": {
@@ -663,7 +663,7 @@
         "dragging": false,
         "id": "ChatOutput-IffMm",
         "measured": {
-          "height": 51,
+          "height": 52,
           "width": 192
         },
         "position": {
@@ -705,7 +705,7 @@
             ],
             "frozen": false,
             "icon": "brain-circuit",
-            "last_updated": "2026-09-24T13:35:14.873Z",
+            "last_updated": "2026-10-03T04:34:06.704Z",
             "legacy": false,
             "lf_version": "1.11.6",
             "metadata": {
@@ -783,7 +783,7 @@
                 "api_editable": false,
                 "display_name": "API Key",
                 "dynamic": false,
-                "info": "Falls back to GOOGLE_API_KEY environment variable",
+                "info": "Overrides global provider settings. Leave blank to use your pre-configured API Key.",
                 "input_types": [],
                 "load_from_db": false,
                 "name": "api_key",
@@ -905,6 +905,7 @@
                 "value": 0
               },
               "model": {
+                "_connection_mode": true,
                 "_input_type": "ModelInput",
                 "advanced": false,
                 "api_editable": false,
@@ -1014,6 +1015,23 @@
                     },
                     "name": "gemini-3.6-flash",
                     "provider": "Google Generative AI"
+                  },
+                  {
+                    "category": "Google Generative AI",
+                    "icon": "GoogleGenerativeAI",
+                    "metadata": {
+                      "api_key_param": "google_api_key",
+                      "context_length": 128000,
+                      "max_tokens_field_name": "max_output_tokens",
+                      "model_class": "ChatGoogleGenerativeAIFixed",
+                      "model_name_param": "model",
+                      "reasoning": true,
+                      "reasoning_models": [
+                        "gemini-3.5-flash"
+                      ]
+                    },
+                    "name": "gemini-3.5-flash",
+                    "provider": "Google Generative AI"
                   }
                 ],
                 "override_skip": false,
@@ -1038,10 +1056,10 @@
                       "model_name_param": "model",
                       "reasoning": true,
                       "reasoning_models": [
-                        "gemini-3.6-flash"
+                        "gemini-3.5-flash"
                       ]
                     },
-                    "name": "gemini-3.6-flash",
+                    "name": "gemini-3.5-flash",
                     "provider": "Google Generative AI"
                   }
                 ]
@@ -1184,7 +1202,7 @@
                 "trace_as_metadata": true,
                 "track_in_telemetry": false,
                 "type": "str",
-                "value": "Kamu adalah AI evidence analyst untuk kasus penagihan pinjaman online (pinjol) di Indonesia.\n\nINPUT\nInput berupa screenshot (chat, SMS, riwayat panggilan) atau teks. Jika ada gambar, baca dulu semua teks yang terlihat (nama/nomor pengirim, tanggal, jam, isi pesan). Jangan mengarang teks yang tidak terbaca. Jika gambar tidak jelas atau tidak terbaca, jelaskan di \"reason\", turunkan confidence (maksimal 20), dan isi category NORMAL dengan severity LOW.\n\nTUGAS\n1. Ekstrak entity: actor, victim, date_time, phone_number, organization, location, key_event. Masukkan hanya yang benar-benar ada di bukti.\n2. Klasifikasikan ke TEPAT SATU kategori.\n3. Tentukan severity: LOW, MEDIUM, atau HIGH.\n4. Tulis \"reason\" dalam bahasa Indonesia (1-3 kalimat) yang menyebut bagian bukti yang menjadi dasar.\nUntuk entity, isi nilai yang konkret (nama, nomor telepon, nama perusahaan, tanggal). Jangan isi dengan kata ganti seperti \"kami\", \"kamu\", atau \"Anda\"; jika tidak ada nilai konkret, lewati entity tersebut.\n\nDEFINISI KATEGORI\n- NORMAL: pengingat tagihan yang sopan dan wajar (jatuh tempo, nominal, cara bayar) tanpa tekanan atau ancaman.\n- HARASSMENT: intimidasi atau tekanan TANPA ancaman eksplisit berpola \"kalau X maka Y\". Contoh: kata kasar atau menghina, kontak berlebihan, menyebut tahu alamat/tempat kerja/keluarga untuk menakut-nakuti (\"kami tahu alamat rumah kamu, tunggu saja\").\n- THREAT: ancaman BERSYARAT yang eksplisit untuk memaksa pembayaran (\"kalau/jika tidak bayar, kami akan ...\"), termasuk ancaman kekerasan, mempermalukan, atau menyebarkan data.\n- DATA_EXPOSURE: penyebaran atau pengiriman data pribadi ke pihak ketiga yang dinyatakan sedang atau sudah dilakukan, TANPA syarat (\"kami kirim foto KTP Anda ke grup\", \"data kamu sudah kami sebar\").\n- SPAM: pesan massal atau berulang yang tidak terkait tagihan pengguna (promosi pinjaman lain, link, penawaran).\n\nATURAN PEMBEDA\n- Ada syarat (kalau/jika/apabila tidak bayar ... kami akan ...) -> THREAT, walaupun isi ancamannya soal data.\n- Data pribadi dinyatakan sudah/sedang disebar tanpa syarat -> DATA_EXPOSURE.\n- Intimidasi tersirat tanpa ancaman eksplisit -> HARASSMENT.\n- Jika memenuhi lebih dari satu, pilih yang paling sesuai dengan aturan di atas.\n\nSEVERITY\n- LOW: NORMAL dan SPAM biasa.\n- MEDIUM: kata kasar atau tekanan berulang tanpa ancaman.\n- HIGH: ancaman, penyebaran data pribadi, atau intimidasi yang menyebut alamat/keluarga.\n\nCONFIDENCE\nBilangan bulat 0-100: seberapa yakin kamu pada kategori yang dipilih. Turunkan jika teks buram atau konteksnya kurang.\n\nREGULASI\nIsi \"regulation_reference\" dengan [] (array kosong). Jangan menyebut pasal atau peraturan apa pun.\n\nOUTPUT\nBalas HANYA dengan JSON valid, tanpa teks lain dan tanpa markdown:\n{\n  \"category\": \"NORMAL|HARASSMENT|THREAT|DATA_EXPOSURE|SPAM\",\n  \"severity\": \"LOW|MEDIUM|HIGH\",\n  \"reason\": \"...\",\n  \"confidence\": 0,\n  \"regulation_reference\": [],\n  \"entities\": [\n    {\"entity_type\": \"actor\", \"entity_value\": \"...\", \"confidence\": 0}\n  ]\n}"
+                "value": "Kamu adalah AI evidence analyst untuk kasus penagihan pinjaman online (pinjol) di Indonesia.\n\nINPUT\nInput berupa screenshot (chat, SMS, riwayat panggilan) atau teks. Jika ada gambar, baca dulu semua teks yang terlihat (nama/nomor pengirim, tanggal, jam, isi pesan). Jangan mengarang teks yang tidak terbaca. Jika gambar tidak jelas atau tidak terbaca, jelaskan di \"reason\", turunkan confidence (maksimal 20), dan isi category NORMAL dengan severity LOW.\n\nTUGAS\n1. Ekstrak entity: actor, victim, date_time, phone_number, organization, location, key_event. Masukkan hanya yang benar-benar ada di bukti.\n2. Klasifikasikan ke TEPAT SATU kategori.\n3. Tentukan severity: LOW, MEDIUM, atau HIGH.\n4. Tulis \"reason\" dalam bahasa Indonesia (1-3 kalimat) yang menyebut bagian bukti yang menjadi dasar.\n\nATURAN ENTITY\n- actor: nama ORANG penagih yang tertulis eksplisit (mis. tanda tangan di akhir pesan). Bukan nomor telepon dan bukan nama aplikasi/perusahaan. Jika tidak ada nama orang, lewati.\n- victim: nama orang yang disapa atau ditagih (penerima pesan).\n- organization: nama aplikasi/perusahaan/lembaga yang mengirim pesan atau menagih. Bukan operator seluler yang hanya disebut sebagai sasaran promo.\n- phone_number: hanya nomor yang terbaca LENGKAP. Lewati nomor yang terpotong atau disensor (mis. \"+62 811-98...\") dan short code SMS (mis. \"8000\").\n- date_time: hanya penanda yang memuat tanggal (mis. \"Thu, Feb 6 at 14:53\"). Lewati jam saja tanpa tanggal dan kata relatif seperti \"Yesterday\", \"Kemarin\", \"Hari ini\". Ekstrak SEMUA tanggal yang terlihat, bukan hanya yang pertama.\n- Satu nilai hanya boleh muncul di SATU entity_type. Jangan duplikasi.\n- Isi nilai yang konkret. Jangan isi dengan kata ganti seperti \"kami\", \"kamu\", atau \"Anda\"; jika tidak ada nilai konkret, lewati entity tersebut.\n\nDEFINISI KATEGORI\n- NORMAL: pengingat tagihan yang sopan dan wajar (jatuh tempo, nominal, cara bayar) tanpa tekanan atau ancaman.\n- HARASSMENT: intimidasi atau tekanan TANPA ancaman bersyarat yang eksplisit. Contoh: kata kasar atau menghina, kontak berlebihan, menyebut tahu alamat/tempat kerja/keluarga untuk menakut-nakuti, atau gertakan dan peringatan samar yang tidak memakai kata syarat dan tidak menyebut tindakan konkret.\n- THREAT: ancaman BERSYARAT yang eksplisit untuk memaksa pembayaran (\"kalau/jika tidak bayar, kami akan ...\"), termasuk ancaman kekerasan, mempermalukan, atau menyebarkan data. Pola bersyarat ini tetap THREAT walaupun konsekuensinya tidak disebut secara spesifik.\n- DATA_EXPOSURE: penyebaran atau pengiriman data pribadi ATAU status utang/pinjaman ke pihak lain mana pun selain korban (keluarga, atasan, rekan kerja, kontak, penagih lapangan, grup, atau publik) yang dinyatakan sedang atau sudah dilakukan, TANPA syarat. Termasuk membocorkan bahwa seseorang punya utang ke pihak yang tidak berkepentingan, bukan cuma dokumen identitas seperti KTP/foto.\n- SPAM: pesan massal atau berulang yang tidak terkait tagihan pengguna (promosi pinjaman lain, link, penawaran), ATAU pesan identik yang dikirim berkali-kali (flooding) dalam waktu singkat, walau isinya tentang tagihan penerima sendiri.\n\nATURAN PEMBEDA\n- Ada syarat yang jelas (kalau/jika/apabila tidak bayar ... kami akan ..., atau pola \"bayar ... atau kami ...\") -> THREAT, walaupun isi ancamannya soal data atau konsekuensinya tidak spesifik.\n- Data pribadi (nomor HP, alamat, KTP, foto) atau status utang yang dinyatakan sudah/sedang dikirim ke pihak lain mana pun selain korban, tanpa syarat -> DATA_EXPOSURE, bukan HARASSMENT, walau nadanya mengintimidasi.\n- Pesan identik dikirim berulang kali dalam waktu singkat (flooding) -> SPAM, walau temanya soal tagihan sendiri.\n- Intimidasi tersirat atau gertakan samar tanpa kata syarat dan tanpa tindakan yang disebut -> HARASSMENT.\n- Jika memenuhi lebih dari satu, pilih yang paling sesuai dengan aturan di atas.\n\n\nSEVERITY\n- LOW: NORMAL dan SPAM biasa.\n- MEDIUM: kata kasar atau tekanan berulang tanpa ancaman, dan SPAM flooding (pesan identik berulang dalam waktu singkat).\n- HIGH: ancaman, penyebaran data pribadi, atau intimidasi yang menyebut alamat/keluarga.\n\nCONFIDENCE\nBilangan bulat 0-100: seberapa yakin kamu pada kategori yang dipilih. Turunkan jika teks buram atau konteksnya kurang.\n\nREGULASI\nPilih referensi yang paling sesuai dengan kategori yang dipilih. Isi \"regulation_reference\" sebagai array berisi objek {\"law\": \"...\", \"article\": \"...\", \"note\": \"...\"}. Untuk NORMAL, isi array kosong [].\n\n- THREAT -> [{\"law\": \"UU No. 11/2008 jo. UU No. 19/2016 jo. UU No. 1/2024 (UU ITE)\", \"article\": \"Pasal 29\", \"note\": \"Larangan mengirim informasi elektronik berisi ancaman kekerasan atau menakut-nakuti secara pribadi\"}]\n- HARASSMENT -> [{\"law\": \"POJK No. 22 Tahun 2023\", \"article\": \"Pasal 62 ayat (2) huruf a-b\", \"note\": \"Larangan penagihan dengan ancaman, kekerasan, tekanan verbal, atau mempermalukan konsumen\"}, {\"law\": \"UU ITE (perubahan UU No. 1/2024)\", \"article\": \"Pasal 27A\", \"note\": \"Penyerangan kehormatan/nama baik melalui sistem elektronik agar diketahui umum\"}]\n- DATA_EXPOSURE -> [{\"law\": \"UU No. 27/2022 tentang Pelindungan Data Pribadi\", \"article\": \"Pasal 65 ayat (2) jo. Pasal 67 ayat (2)\", \"note\": \"Larangan mengungkapkan data pribadi orang lain tanpa hak\"}, {\"law\": \"UU ITE\", \"article\": \"Pasal 32\", \"note\": \"Tindakan tanpa hak terhadap informasi/dokumen elektronik milik orang lain (referensi pendukung)\"}]\n- SPAM -> Kalau berupa pesan IDENTIK yang dikirim berulang kali dalam waktu singkat (flooding) terkait tagihan penerima sendiri: [{\"law\": \"POJK No. 22 Tahun 2023\", \"article\": \"Pasal 62 ayat (2) huruf d\", \"note\": \"Larangan penagihan terus-menerus yang bersifat mengganggu (lebih dari 3 kali dalam satu hari)\"}]. Kalau berupa promosi/tawaran yang TIDAK terkait tagihan penerima (link, iklan pinjaman lain, tanpa bukti pengulangan): isi array kosong [], karena bukan pelanggaran etika penagihan.\n- NORMAL -> []\n\nOUTPUT\nBalas HANYA dengan JSON valid, tanpa teks lain dan tanpa markdown:\n{\n  \"category\": \"NORMAL|HARASSMENT|THREAT|DATA_EXPOSURE|SPAM\",\n  \"severity\": \"LOW|MEDIUM|HIGH\",\n  \"reason\": \"...\",\n  \"confidence\": 0,\n  \"regulation_reference\": [],\n  \"entities\": [\n    {\"entity_type\": \"actor\", \"entity_value\": \"...\", \"confidence\": 0}\n  ]\n}"
               },
               "temperature": {
                 "_input_type": "SliderInput",
@@ -1227,7 +1245,7 @@
         "dragging": false,
         "id": "LanguageModelComponent-y3OmH",
         "measured": {
-          "height": 369,
+          "height": 370,
           "width": 320
         },
         "position": {
@@ -1239,9 +1257,9 @@
       }
     ],
     "viewport": {
-      "x": 35.551161191270126,
-      "y": 163.7419312927897,
-      "zoom": 1.2125967659391788
+      "x": 37.90153024031372,
+      "y": 181.7364883163065,
+      "zoom": 1.4084608533594818
     }
   },
   "description": "Connect the Dots, Craft Language.",
