@@ -8,7 +8,7 @@ import uuid
 
 api_key = os.environ["LANGFLOW_API_KEY"]
 flow_id = "e05721f1-c3a2-4a33-bbd2-d30dee3df995"
-img_path = r"D:\HBB\BuktiTagih-AI\screenshotstes\testeks1.jpg"   # ganti sesuai lokasi gambar di laptopmu
+img_path = r"C:\Users\YUSRI\BuktiTagih-AI\tests\f1_entity\tes1.jpg"   # ganti sesuai lokasi gambar di laptopmu
 
 headers = {"x-api-key": api_key}
 

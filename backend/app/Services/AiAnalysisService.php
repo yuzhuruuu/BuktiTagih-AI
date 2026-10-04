@@ -138,7 +138,7 @@ class AiAnalysisService
         $response = Http::withHeaders([
             'x-api-key' => $this->langflowApiKey,
             'Content-Type' => 'application/json',
-        ])->post($runUrl, $payload);
+        ])->timeout(120)->post($runUrl, $payload);
 
         if (!$response->successful()) {
             throw new \Exception(

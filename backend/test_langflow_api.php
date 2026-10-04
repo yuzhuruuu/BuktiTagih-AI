@@ -13,10 +13,11 @@ use GuzzleHttp\Client;
 $client = new Client();
 
 // Config dari .env
-$LANGFLOW_URL = 'http://127.0.0.1:7860';
-$LANGFLOW_FLOW_ID = 'e05721f1-c3a2-4a33-bbd2-d30dee3df995';
-$LANGFLOW_API_KEY = 'sk-kgQnr6-TXb89fohaLTZbhMCz7VISNRmCu8CleGY8A64';
-$LANGFLOW_CHAT_INPUT_ID = 'ChatInput-aPEX5';
+// Config dari .env
+$LANGFLOW_URL = env('LANGFLOW_URL', 'http://127.0.0.1:7860');
+$LANGFLOW_FLOW_ID = env('LANGFLOW_FLOW_ID');
+$LANGFLOW_API_KEY = env('LANGFLOW_API_KEY');
+$LANGFLOW_CHAT_INPUT_ID = env('LANGFLOW_CHAT_INPUT_ID', 'ChatInput-aPEX5');
 
 // Test case: simple text (THREAT category)
 $testText = "Kalau tidak bayar hari ini, kami sebar data keluarga kamu.";
